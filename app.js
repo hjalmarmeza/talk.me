@@ -683,10 +683,16 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition.onerror = (event) => {
             if (event.error === 'aborted' || event.error === 'no-speech') {
                 // Silenciar o manejar el aborto intencional y la falta de voz
+                // Nos aseguramos de limpiar el UI por si onend se atora
+                if (liveOverlay) liveOverlay.classList.remove('active');
                 return;
             }
             console.error("Error de micrófono:", event.error);
             if (statusText) statusText.innerText = 'Error al escuchar';
+            if (liveOverlay) liveOverlay.classList.remove('active');
+            isRecording = false;
+            pttBtn.classList.remove('recording');
+            document.body.classList.remove('is-recording');
         };
 
         recognition.onend = () => {
@@ -804,8 +810,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    pttBtn.addEventListener('mousedown', toggleRecording);
-    pttBtn.addEventListener('touchstart', toggleRecording, { passive: false });
+    // Usar click unificado en lugar de mousedown/touchstart para evitar doble-disparo fantasma en móviles
+    pttBtn.addEventListener('click', toggleRecording);
 
     // Enviar instrucción de detener al botón rojo gigante del modo inmersivo
     if (liveStopBtn) {
