@@ -534,8 +534,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lang; // Ej. 'es-ES' o 'en-US'
 
-        // Las voces de la web como Google son naturales, bajémomos muy sutilmente pero no a 0.85 ya que silencia el Play a veces
-        utterance.rate = 0.95;
+        // Afinación conversacional: 0.9 no dispara el bug de silencio en iOS pero le da un respiro a la voz
+        utterance.rate = 0.9;
+        // Bajar LIGERAMENTE el tono le da naturalidad "humana" en vez de asisente aguda
+        utterance.pitch = 0.95;
 
         // Inyectar la voz personalizada (si está definida y si corresponde al idioma que estamos por hablar)
         const voices = synth.getVoices();
@@ -624,7 +626,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (instructionEl) instructionEl.innerText = getT().tapToTalk;
 
             // Combinar y limpiar texto
-            const textToSend = finalTranscript.trim();
+            let rawText = finalTranscript.trim();
+
+            // --- TRUCO DE ENTONACIÓN SINTÉTICA ---
+            // Los motores de dictado no ponen comas. Añadimos comas artificiales antes de conectores para
+            // forzar que la voz de Robot tome "respiros" y tenga cadencia humana natural al hablar.
+            if (rawText) {
+                rawText = rawText.replace(/ (pero|porque|aunque|entonces|además|sin embargo|but|because|although|then|mais|parce que|donc) /gi, ', $1 ');
+                // Normalización gramatical básica para mejor acento de la IA
+                rawText = rawText.charAt(0).toUpperCase() + rawText.slice(1);
+                if (!/[.!?]$/.test(rawText)) {
+                    rawText += ".";
+                }
+            }
+
+            const textToSend = rawText;
 
             if (textToSend) {
                 statusText.innerText = getT().statusSending;
