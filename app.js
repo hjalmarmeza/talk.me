@@ -62,7 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
             shareSubject: "Invitación a Dialecta de ",
             shareBody: "Únete a mi sala en Dialecta para traducir nuestras voces en tiempo real:",
             voiceLabel: "Voz:", autoVoice: "Automática",
-            clearConfirm: "¿Seguro que quieres borrar todos los mensajes de esta sala para ambos?"
+            clearConfirm: "¿Seguro que quieres borrar todos los mensajes de esta sala para ambos?",
+            langES: "Español", langEN: "Inglés (US)", langFR: "Francés", langDE: "Alemán",
+            langIT: "Italiano", langPT: "Portugués (BR)", langJA: "Japonés", langZH: "Chino"
         },
         'en': {
             roomLabel: "Room:", inviteBtn: "Invite", inThisRoom: "In this room", yourName: "Your Name:",
@@ -79,7 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
             shareSubject: "Dialecta invitation from ",
             shareBody: "Join my Dialecta room to translate our voices in real time:",
             voiceLabel: "Voice:", autoVoice: "Automatic",
-            clearConfirm: "Are you sure you want to clear all messages in this room for both of you?"
+            clearConfirm: "Are you sure you want to clear all messages in this room for both of you?",
+            langES: "Spanish", langEN: "English (US)", langFR: "French", langDE: "German",
+            langIT: "Italian", langPT: "Portuguese (BR)", langJA: "Japanese", langZH: "Chinese"
         },
         'fr': {
             roomLabel: "Salle:", inviteBtn: "Inviter", inThisRoom: "Dans cette salle", yourName: "Ton Nom:",
@@ -96,7 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
             shareSubject: "Invitation Dialecta de ",
             shareBody: "Rejoins ma salle Dialecta pour traduire nos voix en direct:",
             voiceLabel: "Voix:", autoVoice: "Automatique",
-            clearConfirm: "Êtes-vous sûr de vouloir effacer tous les messages de cette salle pour tous les deux ?"
+            clearConfirm: "Êtes-vous sûr de vouloir effacer tous les messages de cette salle pour tous les deux ?",
+            langES: "Espagnol", langEN: "Anglais (US)", langFR: "Français", langDE: "Allemand",
+            langIT: "Italien", langPT: "Portugais (BR)", langJA: "Japonais", langZH: "Chinois"
         }
     };
 
