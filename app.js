@@ -47,10 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const translations = {
         'es': {
             roomLabel: "Sala:", inviteBtn: "Invitar", inThisRoom: "En esta sala", yourName: "Tu Nombre:",
-            namePlaceholder: "Ej: Juan", meLabel: "Yo", otherPersonLabel: "Otra Persona:",
-            safeRoomDesc: "Sala segura. Elige tu idioma y mantén presionado el botón central para hablar.",
-            holdToTalk: "Mantén presionado para hablar", inviteTitle: "Invitar a un contacto",
-            inviteDesc: "¿Por dónde quieres enviar la invitación a la sala?", copyLink: "Copiar Link",
+            namePlaceholder: "Ej: Juan", meLabel: "Tú", otherPersonLabel: "Otra Persona:",
+            safeRoomDesc: "Sala segura. Elige los idiomas y toca el botón para hablar o detenerte.",
+            tapToTalk: "Toca para hablar", tapToStop: "Toca para detener", inviteTitle: "Invitar a Dialecta",
+            inviteDesc: "¿Cómo deseas compartir la invitación?", copyLink: "Copiar Enlace",
             alertName: "¡Espera! Escribe tu nombre primero (Ej: Juan) para que sepan quién invita.",
             statusConnecting: "Conectando...", statusListening: "Escuchando...", statusSending: "Enviando...",
             statusReady: "Listo para transmitir", statusIncoming: "Mensaje entrante...",
@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'en': {
             roomLabel: "Room:", inviteBtn: "Invite", inThisRoom: "In this room", yourName: "Your Name:",
             namePlaceholder: "Ex: John", meLabel: "Me", otherPersonLabel: "Other:",
-            safeRoomDesc: "Secure room. Choose your language and hold the center button to speak.",
-            holdToTalk: "Hold to talk", inviteTitle: "Invite a contact",
+            safeRoomDesc: "Secure room. Choose your language and tap the center button to speak or stop.",
+            tapToTalk: "Tap to talk", tapToStop: "Tap to stop", inviteTitle: "Invite a contact",
             inviteDesc: "How would you like to share the room invitation?", copyLink: "Copy Link",
             alertName: "Wait! Write your name first (Ex: John) so they know who's inviting.",
             statusConnecting: "Connecting...", statusListening: "Listening...", statusSending: "Sending...",
@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'fr': {
             roomLabel: "Salle:", inviteBtn: "Inviter", inThisRoom: "Dans cette salle", yourName: "Ton Nom:",
             namePlaceholder: "Ex: Jean", meLabel: "Moi", otherPersonLabel: "Autre:",
-            safeRoomDesc: "Salle sécurisée. Choisissez la langue et maintenez pour parler.",
-            holdToTalk: "Maintenir pour parler", inviteTitle: "Inviter un ami",
+            safeRoomDesc: "Salle sécurisée. Choisissez la langue et appuyez pour parler ou arrêter.",
+            tapToTalk: "Appuyez pour parler", tapToStop: "Appuyez pour arrêter", inviteTitle: "Inviter un ami",
             inviteDesc: "Comment partager l'invitation ?", copyLink: "Copier le lien",
             alertName: "Tapez votre nom d'abord pour qu'ils sachent qui invite.",
             statusListening: "Écoute...", statusSending: "Envoi...",
@@ -524,6 +524,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pttBtn.classList.remove('recording');
             document.body.classList.remove('is-recording');
 
+            // Actualizar boton instruction visual text
+            const instructionEl = document.querySelector('.instruction');
+            if (instructionEl) instructionEl.innerText = getT().tapToTalk;
+
             // Combinar y limpiar texto
             const textToSend = finalTranscript.trim();
 
@@ -562,9 +566,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- 6. SIMULACIÓN DEL BOTÓN WALKIE TALKIE --- //
-    const startWalkieTalkie = (e) => {
-        // Evitamos doble disparo en móviles
+    // --- 6. SIMULACIÓN DEL BOTÓN TOGGLE (Tocar para Grabar / Tocar para Detener) --- //
+    const toggleRecording = (e) => {
+        // Evitamos doble disparo
         if (e && e.cancelable) e.preventDefault();
 
         if (!usernameInput.value.trim()) {
@@ -573,60 +577,48 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (isRecording || !recognition) return;
+        const instructionEl = document.querySelector('.instruction');
 
-        isRecording = true;
-        finalTranscript = ''; // Reset acumulador al presionar botón
-        pttBtn.classList.add('recording');
-        document.body.classList.add('is-recording');
-        statusText.innerText = getT().statusListening;
+        if (!isRecording) {
+            // Empezar a grabar
+            if (!recognition) return;
+            isRecording = true;
+            finalTranscript = '';
+            pttBtn.classList.add('recording');
+            document.body.classList.add('is-recording');
+            statusText.innerText = getT().statusListening;
+            if (instructionEl) instructionEl.innerText = getT().tapToStop;
 
-        // Configuramos para que escuche en el idioma que tiene marcado
-        recognition.lang = myLangSelect.value;
-        try {
-            recognition.start();
-        } catch (err) {
-            console.error("No se pudo iniciar reconocimiento:", err);
-            statusText.innerText = "Error: micrófono ocupado";
-            isRecording = false;
-            pttBtn.classList.remove('recording');
-            document.body.classList.remove('is-recording');
-        }
-    };
-
-    const stopWalkieTalkie = (e) => {
-        if (e && e.cancelable) e.preventDefault();
-        if (!isRecording || !recognition) return;
-
-        // Al soltar el boton paramos de escuchar y procesamos lo oído
-        try {
-            recognition.stop();
-        } catch (err) {
-            console.error(err);
-        }
-
-        // Respaldo por si el navegador se queda atascado sin disparar onend (bug clásico de iOS/Chrome)
-        setTimeout(() => {
-            if (isRecording && recognition.onend) {
-                // Forzar la terminación y envío del texto bloqueado
-                recognition.onend();
+            recognition.lang = myLangSelect.value;
+            try {
+                recognition.start();
+            } catch (err) {
+                console.error("No se pudo iniciar reconocimiento:", err);
+                statusText.innerText = "Error: micrófono ocupado";
+                isRecording = false;
+                pttBtn.classList.remove('recording');
+                document.body.classList.remove('is-recording');
+                if (instructionEl) instructionEl.innerText = getT().tapToTalk;
             }
-        }, 1200);
+        } else {
+            // Detener grabación
+            try {
+                recognition.stop();
+            } catch (err) {
+                console.error(err);
+            }
+
+            // Respaldo por si el navegador se queda atascado sin disparar onend
+            setTimeout(() => {
+                if (isRecording && recognition.onend) {
+                    recognition.onend();
+                }
+            }, 1200);
+        }
     };
 
-    // Eventos PC (Mouse)
-    pttBtn.addEventListener('mousedown', startWalkieTalkie);
-    window.addEventListener('mouseup', stopWalkieTalkie);
-
-    // Eventos Móviles (Touch)
-    pttBtn.addEventListener('touchstart', startWalkieTalkie, { passive: false });
-    window.addEventListener('touchend', stopWalkieTalkie, { passive: false });
-
-    // Cancelar si salen de la ventana o del botón bruscamente
-    pttBtn.addEventListener('mouseleave', () => {
-        if (isRecording) stopWalkieTalkie();
-    });
-    pttBtn.addEventListener('touchcancel', stopWalkieTalkie);
+    // Usar click y touchend para la accion unica (un tap)
+    pttBtn.addEventListener('click', toggleRecording);
 
     // Eliminar mensaje base de bienvenida original (limpieza final)
     const initialBubbles = document.querySelectorAll('.message-bubble');
