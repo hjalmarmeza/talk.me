@@ -42,6 +42,79 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRecording = false;
     let finalTranscript = '';
 
+    // --- I18N (INTERNACIONALIZACIÓN DE LA INTERFAZ) --- //
+    const translations = {
+        'es': {
+            roomLabel: "Sala:", inviteBtn: "Invitar", inThisRoom: "En esta sala", yourName: "Tu Nombre:",
+            namePlaceholder: "Ej: Juan", meLabel: "Yo", otherPersonLabel: "Otra Persona:",
+            safeRoomDesc: "Sala segura. Elige tu idioma y mantén presionado el botón central para hablar.",
+            holdToTalk: "Mantén presionado para hablar", inviteTitle: "Invitar a un contacto",
+            inviteDesc: "¿Por dónde quieres enviar la invitación a la sala?", copyLink: "Copiar Link",
+            alertName: "¡Espera! Escribe tu nombre primero (Ej: Juan) para que sepan quién invita.",
+            statusConnecting: "Conectando...", statusListening: "Escuchando...", statusSending: "Enviando...",
+            statusReady: "Listo para transmitir", statusIncoming: "Mensaje entrante...",
+            unsupported: "Tu navegador no soporta el reconocimiento de voz. ¡Usa Chrome o Safari!",
+            copied: "¡Copiado!", youString: " (Tú)", noNameString: "Tú (Aún sin nombre)",
+            anon: "Usuario Anónimo", youMsg: "Tú",
+            shareSubject: "Invitación a Dialecta de ",
+            shareBody: "Únete a mi sala en Dialecta para traducir nuestras voces en tiempo real:"
+        },
+        'en': {
+            roomLabel: "Room:", inviteBtn: "Invite", inThisRoom: "In this room", yourName: "Your Name:",
+            namePlaceholder: "Ex: John", meLabel: "Me", otherPersonLabel: "Other:",
+            safeRoomDesc: "Secure room. Choose your language and hold the center button to speak.",
+            holdToTalk: "Hold to talk", inviteTitle: "Invite a contact",
+            inviteDesc: "How would you like to share the room invitation?", copyLink: "Copy Link",
+            alertName: "Wait! Write your name first (Ex: John) so they know who's inviting.",
+            statusConnecting: "Connecting...", statusListening: "Listening...", statusSending: "Sending...",
+            statusReady: "Ready to transmit", statusIncoming: "Incoming message...",
+            unsupported: "Your browser doesn't support speech recognition. Use Chrome or Safari!",
+            copied: "Copied!", youString: " (You)", noNameString: "You (No name yet)",
+            anon: "Anonymous User", youMsg: "You",
+            shareSubject: "Dialecta invitation from ",
+            shareBody: "Join my Dialecta room to translate our voices in real time:"
+        },
+        'fr': {
+            roomLabel: "Salle:", inviteBtn: "Inviter", inThisRoom: "Dans cette salle", yourName: "Ton Nom:",
+            namePlaceholder: "Ex: Jean", meLabel: "Moi", otherPersonLabel: "Autre:",
+            safeRoomDesc: "Salle sécurisée. Choisissez la langue et maintenez pour parler.",
+            holdToTalk: "Maintenir pour parler", inviteTitle: "Inviter un ami",
+            inviteDesc: "Comment partager l'invitation ?", copyLink: "Copier le lien",
+            alertName: "Tapez votre nom d'abord pour qu'ils sachent qui invite.",
+            statusListening: "Écoute...", statusSending: "Envoi...",
+            statusReady: "Prêt à parler", statusIncoming: "Message entrant...",
+            unsupported: "Navigateur non supporté. Utilisez Chrome ou Safari!",
+            copied: "Copié!", youString: " (Moi)", noNameString: "Moi (Anonyme)",
+            anon: "Anonyme", youMsg: "Moi",
+            shareSubject: "Invitation Dialecta de ",
+            shareBody: "Rejoins ma salle Dialecta pour traduire nos voix en direct:"
+        }
+    };
+
+    function getT() {
+        const langCode = myLangSelect.value.split('-')[0];
+        return translations[langCode] || translations['en'];
+    }
+
+    function updateUI() {
+        const t = getT();
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key]) el.innerText = t[key];
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (t[key]) el.placeholder = t[key];
+        });
+
+        const val = usernameInput.value.trim();
+        selfContactName.innerText = val ? val + t.youString : t.noNameString;
+
+        if (!isRecording && statusText.innerText !== t.statusIncoming) {
+            statusText.innerText = t.statusReady;
+        }
+    }
+
     // --- 0. EXPERIENCIA FÁCIL (ABUELO-FRIENDLY) - MEMORIA AUTOMÁTICA --- //
     // Aquí hacemos que la app recuerde quién es el usuario y su idioma.
     // Así los nietos se lo configuran 1 sola vez y el abuelo ya no debe tocar nada.
@@ -64,11 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
         targetLangSelect.value = savedTargetLang;
     }
 
+    updateUI(); // Se traduce en cuanto arranca la app
+
     // Guardar cambios automáticamente si el nieto modifica el nombre o idioma
     usernameInput.addEventListener('input', (e) => {
         const val = e.target.value.trim();
+        const t = getT();
         localStorage.setItem('lingoName', val);
-        selfContactName.innerText = val ? val + " (Tú)" : "Tú (Aún sin nombre)";
+        selfContactName.innerText = val ? val + t.youString : t.noNameString;
     });
 
     myLangSelect.addEventListener('change', () => {
@@ -76,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = myLangSelect.options[myLangSelect.selectedIndex].text;
         localStorage.setItem('lingoLang', val);
         selfContactLang.innerText = text;
+        updateUI(); // Traducir la interfaz instantaneamente al cambiar origen
     });
 
     targetLangSelect.addEventListener('change', () => {
@@ -123,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onChildAdded(messagesRef, async (snapshot) => {
         const msg = snapshot.val();
         const miIdioma = myLangSelect.value;
-        const currentUser = usernameInput.value.trim() || 'Usuario Anónimo';
+        const currentUser = usernameInput.value.trim() || getT().anon;
 
         // MÁGICA DE CONTACTOS: Si alguien envía un mensaje y no soy yo, añadirlo al panel
         if (msg.deviceId !== myDeviceId) {
@@ -173,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             // Viene de un familiar (Entrante)
-            statusText.innerText = 'Mensaje entrante...';
+            statusText.innerText = getT().statusIncoming;
 
             // Lo traducimos a NUESTRO idioma
             let traduccionParaMi = msg.originalText;
@@ -188,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 speakText(traduccionParaMi, miIdioma);
             }
 
-            statusText.innerText = 'Listo para transmitir';
+            statusText.innerText = getT().statusReady;
         }
     });
 
@@ -212,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentUser = usernameInput.value.trim();
 
         if (!currentUser) {
-            alert("¡Espera! Escribe tu nombre primero (Ej. Tío Hjalmar) para que tu familia sepa quién lo invita.");
+            alert(getT().alertName);
             usernameInput.focus();
             return;
         }
@@ -223,10 +300,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ACCIONES ESPECÍFICAS DE COMPARTIR ---
 
     function getShareData() {
+        const t = getT();
         const currentUser = usernameInput.value.trim();
         const link = window.location.protocol + "//" + window.location.host + window.location.pathname + '?room=' + currentRoom;
-        const shortText = `¡Hola! Soy ${currentUser}. Únete a mi sala en Dialecta para traducir nuestras voces en tiempo real:`;
-        return { currentUser, link, shortText };
+        const shortText = `¡Hola! / Hello! ${currentUser}. ${t.shareBody} ${link}`;
+        return { currentUser, link, shortText, t };
     }
 
     document.getElementById('share-wa').addEventListener('click', () => {
@@ -244,29 +322,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('share-email').addEventListener('click', () => {
         const data = getShareData();
-        const subject = `Invitación a Dialecta de ${data.currentUser}`;
-        const body = `¡Hola!\n\n${data.shortText}\n\nIngresa desde tu celular o pc haciendo clic aquí:\n${data.link}`;
+        const subject = `${data.t.shareSubject}${data.currentUser}`;
+        const body = `${data.shortText} ${data.link}`;
         window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         shareModal.classList.add('hidden');
     });
 
     document.getElementById('share-copy').addEventListener('click', async () => {
         const data = getShareData();
-        const msg = `${data.shortText} ${data.link}`;
+        const msg = `${data.shortText}`;
 
         try {
             await navigator.clipboard.writeText(msg);
 
             const btn = document.getElementById('share-copy');
             const origHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="ph-fill ph-check-circle"></i> ¡Copiado!';
+            btn.innerHTML = `<i class="ph-fill ph-check-circle"></i> ${data.t.copied}`;
 
             setTimeout(() => {
                 btn.innerHTML = origHTML;
             }, 2000);
 
         } catch (e) {
-            alert("Tu enlace es: " + data.link);
+            alert("Error: " + data.link);
         }
     });
 
@@ -280,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition.continuous = false; // Solo graba un audio a la vez, como Walkie Talkie
         recognition.interimResults = false; // Sin resultados parciales por ahora para mayor precisión
     } else {
-        alert("Tu navegador no soporta el reconocimiento de voz. ¡Usa Google Chrome o Safari para usar Dialecta!");
+        alert(getT().unsupported);
     }
 
     // --- 2. FUNCIÓN DE TRADUCCIÓN GRATUITA (Hack de Google Translate) --- //
@@ -326,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bubble.className = `message-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
 
         bubble.innerHTML = `
-            <div style="font-size: 11px; margin-bottom: 4px; opacity: 0.7; font-weight: bold; color: ${isOutgoing ? 'var(--text-translated)' : 'var(--accent-secondary)'};">${isOutgoing ? 'Tú' : senderName}</div>
+            <div style="font-size: 11px; margin-bottom: 4px; opacity: 0.7; font-weight: bold; color: ${isOutgoing ? 'var(--text-translated)' : 'var(--accent-secondary)'};">${isOutgoing ? getT().youMsg : senderName}</div>
             <div class="msg-original">${originalText}</div>
             <div class="msg-translated">${translatedText}</div>
             <button class="play-btn" aria-label="Reproducir traducción"><i class="ph-fill ph-play-circle"></i></button>
@@ -359,15 +437,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 5. EVENTOS DEL RECONOCIMIENTO DE VOZ --- //
     if (recognition) {
         recognition.onstart = () => {
-            statusText.innerText = 'Escuchando...';
+            statusText.innerText = getT().statusListening;
         };
 
         recognition.onresult = (event) => {
             finalTranscript = event.results[0][0].transcript;
 
-            statusText.innerText = 'Enviando...';
+            statusText.innerText = getT().statusSending;
 
-            const currentUser = usernameInput.value.trim() || 'Usuario Anónimo';
+            const currentUser = usernameInput.value.trim() || getT().anon;
 
             // ENVÍO REAL A FIREBASE
             // Esto mandará el mensaje a la nube de Google. Al recibirlo de vuelta (vía onChildAdded arriba),
@@ -382,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Re-habilitamos estado grabando si alguien más quiere hablar
             setTimeout(() => {
-                statusText.innerText = 'Listo para transmitir';
+                statusText.innerText = getT().statusReady;
             }, 500);
         };
 

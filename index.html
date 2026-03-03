@@ -38,14 +38,14 @@
             <div class="room-info">
                 <div class="room-badge">
                     <span class="status-dot"></span>
-                    Sala: <strong id="room-id-display">creando...</strong>
+                    <span data-i18n="roomLabel">Sala:</span> <strong id="room-id-display">creando...</strong>
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <button id="contacts-btn" class="glass-btn-small" style="background: rgba(255,255,255,0.05);">
                         <i class="ph ph-users"></i>
                     </button>
                     <button id="invite-btn" class="glass-btn-small">
-                        <i class="ph ph-share-network"></i> Invitar
+                        <i class="ph ph-share-network"></i> <span data-i18n="inviteBtn">Invitar</span>
                     </button>
                 </div>
             </div>
@@ -53,7 +53,7 @@
             <!-- Panel de Contactos (Oculto por defecto) -->
             <div id="contacts-panel" class="contacts-panel hidden">
                 <div class="contacts-header">
-                    <h3>En esta sala</h3>
+                    <h3 data-i18n="inThisRoom">En esta sala</h3>
                     <button id="close-contacts" class="close-btn"><i class="ph ph-x"></i></button>
                 </div>
                 <ul class="contacts-list" id="contacts-list">
@@ -70,12 +70,16 @@
 
             <div class="user-config">
                 <div class="input-group">
-                    <label for="username"><i class="ph ph-user"></i> Tu Nombre:</label>
-                    <input type="text" id="username" class="glass-input" placeholder="Ej: Tío Hjalmar" required>
+                    <label for="username"><i class="ph ph-user"></i> <span data-i18n="yourName">Tu
+                            Nombre:</span></label>
+                    <input type="text" id="username" class="glass-input" placeholder="Ej: Juan"
+                        data-i18n-placeholder="namePlaceholder" required>
                 </div>
 
                 <div class="lang-group">
-                    <label><i class="ph ph-translate"></i> Yo <i class="ph ph-arrow-right"></i> Otra Persona:</label>
+                    <label><i class="ph ph-translate"></i> <span data-i18n="meLabel">Yo</span> <i
+                            class="ph ph-arrow-right"></i> <span data-i18n="otherPersonLabel">Otra
+                            Persona:</span></label>
                     <div class="travel-selectors">
                         <div class="select-wrapper">
                             <select id="my-lang" class="glass-select">
@@ -118,7 +122,8 @@
 
             <div class="system-message">
                 <i class="ph ph-shield-check"></i>
-                <span>Sala segura. Elige tu idioma y mantén presionado el botón central para hablar.</span>
+                <span data-i18n="safeRoomDesc">Sala segura. Elige tu idioma y mantén presionado el botón central para
+                    hablar.</span>
             </div>
 
         </section>
@@ -136,17 +141,17 @@
                 </button>
             </div>
 
-            <p class="instruction">Mantén presionado para hablar</p>
+            <p class="instruction" data-i18n="holdToTalk">Mantén presionado para hablar</p>
         </footer>
 
         <!-- Modal de Compartir -->
         <div id="share-modal" class="share-modal hidden">
             <div class="share-content">
                 <div class="share-header">
-                    <h3>Invitar a un familiar</h3>
+                    <h3 data-i18n="inviteTitle">Invitar a un contacto</h3>
                     <button id="close-share" class="close-btn"><i class="ph ph-x"></i></button>
                 </div>
-                <p class="share-desc">¿Por dónde quieres enviar la invitación a la sala?</p>
+                <p class="share-desc" data-i18n="inviteDesc">¿Por dónde quieres enviar la invitación a la sala?</p>
                 <div class="share-options">
                     <button class="share-btn whatsapp" id="share-wa">
                         <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp
@@ -158,7 +163,7 @@
                         <i class="ph-fill ph-envelope"></i> Correo
                     </button>
                     <button class="share-btn copy" id="share-copy">
-                        <i class="ph-fill ph-copy"></i> Copiar Link
+                        <i class="ph-fill ph-copy"></i> <span data-i18n="copyLink">Copiar Link</span>
                     </button>
                 </div>
             </div>
