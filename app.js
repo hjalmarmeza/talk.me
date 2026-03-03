@@ -405,11 +405,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (synth) {
         synth.onvoiceschanged = populateVoices;
+        // Algunos navegadores cargan voces instantáneamente y nunca disparan el evento
+        populateVoices();
+        // Otros toman un poco más de tiempo, un timer de respaldo asegura que aparezcan
+        setTimeout(populateVoices, 1000);
     }
     // Re-pintar lista de voces de lectura cuando el idioma base cambie
     myLangSelect.addEventListener('change', populateVoices);
-
-
     // --- 2. FUNCIÓN DE TRADUCCIÓN GRATUITA (Hack de Google Translate) --- //
     // NOTA: Para producción real en el futuro, es mejor tu backend de Google Apps Script o una API oficial
     async function translateText(text, sourceLang, targetLang) {
