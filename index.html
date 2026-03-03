@@ -47,14 +47,23 @@
                 </div>
 
                 <!-- Opciones de lenguaje de LA APP (Visual) -->
-                <div class="app-lang-selector" style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
-                    <i class="ph ph-globe" style="color: var(--accent-secondary); font-size: 20px;"></i>
-                    <select id="app-lang-select" class="glass-select"
-                        style="padding: 4px 8px; font-size: 13px; height: auto;">
-                        <option value="es">ES</option>
-                        <option value="en">EN</option>
-                        <option value="fr">FR</option>
-                    </select>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="app-lang-selector"
+                        style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                        <i class="ph ph-globe" style="color: var(--accent-secondary); font-size: 20px;"></i>
+                        <select id="app-lang-select" class="glass-select"
+                            style="padding: 4px 8px; font-size: 13px; height: auto;">
+                            <option value="es">ES</option>
+                            <option value="en">EN</option>
+                            <option value="fr">FR</option>
+                        </select>
+                    </div>
+
+                    <button id="clear-local-btn" class="glass-btn-small"
+                        style="background: rgba(255,255,255,0.05); padding: 4px 8px;"
+                        title="Limpiar mis mensajes de pantalla">
+                        <i class="ph ph-trash" style="font-size: 16px;"></i>
+                    </button>
                 </div>
             </div>
 

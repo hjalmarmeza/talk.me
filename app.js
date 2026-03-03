@@ -299,6 +299,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Lógica para limpiar SOLO mi pantalla
+    const clearLocalBtn = document.getElementById('clear-local-btn');
+    if (clearLocalBtn) {
+        clearLocalBtn.addEventListener('click', () => {
+            if (confirm("¿Limpiar los mensajes solo de esta pantalla?")) {
+                const bubbles = document.querySelectorAll('.message-bubble');
+                bubbles.forEach(b => b.remove());
+
+                const systemMsg = chatHistory.querySelector('.system-message');
+                if (systemMsg) systemMsg.style.display = 'flex';
+            }
+        });
+    }
+
     // Detectar cuando alguien borra la sala entera o mis mensajes
     onChildRemoved(messagesRef, (oldSnapshot) => {
         // Al removerse el primer elemento, limpiamos el historial visual entero
