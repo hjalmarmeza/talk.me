@@ -555,6 +555,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Aplicamos el formateo y pausas sintéticas ANTES de hablar
         // Esto le da a la voz IA el "respiro" y la entonación que requiere para sonar humana.
         let formattedText = text.replace(/ (pero|porque|aunque|entonces|además|sin embargo|y|but|because|although|then|and|mais|parce que|donc|et) /gi, ', $1 ');
+
+        // Puntuaciones obligatorias fuertes (Puntos artificiales para tomar aires profundos)
+        formattedText = formattedText.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
+
         formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         if (!/[.!?]$/.test(formattedText)) {
             formattedText += ".";
@@ -563,8 +567,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const utterance = new SpeechSynthesisUtterance(formattedText);
         utterance.lang = lang; // Ej. 'es-ES' o 'en-US'
 
-        // Afinación conversacional: 0.9 no dispara el bug de silencio en iOS pero le da un respiro a la voz
-        utterance.rate = 0.9;
+        // Afinación conversacional lenta: 0.82 permite a la voz "respirar" y leer muy pausado
+        utterance.rate = 0.82;
         // Bajar LIGERAMENTE el tono le da naturalidad "humana" en vez de adolescente aguda
         utterance.pitch = 0.95;
 
@@ -660,6 +664,18 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         recognition.onend = () => {
+            // SI SIGUE GRABANDO (Es decir, el usuario NO fue quien presionó el botón para detener)
+            // Significa que Chrome/Safari cortó el micro por "silencio prolongado". 
+            // Para solucionarlo, simplemente encendemos el mic en secreto de nuevo para que sea infinito.
+            if (isRecording) {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.log("No se pudo auto-reiniciar", e);
+                }
+                return; // Cortamos la función para que NO mande el mensaje ni detenga visualmente nada
+            }
+
             isRecording = false;
             pttBtn.classList.remove('recording');
             document.body.classList.remove('is-recording');
