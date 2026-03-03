@@ -574,9 +574,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Inyectar la voz personalizada (si está definida)
         const voices = synth.getVoices();
         const selectedVoiceURI = voiceSelect.value;
+        const targetLangPrefix = lang.split('-')[0];
+
         if (selectedVoiceURI) {
             const chosen = voices.find(v => v.voiceURI === selectedVoiceURI);
-            if (chosen) utterance.voice = chosen;
+            // SOLO inyectar si la familia de idioma coincide para evitar el Bug de Silencio Mortal en Apple/Chrome
+            if (chosen && chosen.lang.startsWith(targetLangPrefix)) {
+                utterance.voice = chosen;
+            } else {
+                // Si el mensaje está en otro idioma (ej: el otro usuario), buscamos una voz nativa genérica en el idioma correcto
+                const nativeFallback = voices.find(v => v.lang.startsWith(targetLangPrefix));
+                if (nativeFallback) utterance.voice = nativeFallback;
+            }
+        } else {
+            // Si por alguna razón no hay ninguna seleccionada en el menú, usar la por defecto del idioma
+            const nativeFallback = voices.find(v => v.lang.startsWith(targetLangPrefix));
+            if (nativeFallback) utterance.voice = nativeFallback;
         }
 
         // Efecto visual al hablar
