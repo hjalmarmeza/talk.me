@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pttBtn = document.getElementById('ptt-button');
     const statusText = document.getElementById('status-text');
     const myLangSelect = document.getElementById('my-lang');
+    const targetLangSelect = document.getElementById('target-lang');
+    const swapLangBtn = document.getElementById('swap-lang-btn');
     const usernameInput = document.getElementById('username');
     const chatHistory = document.getElementById('chat-history');
     const roomIdDisplay = document.getElementById('room-id-display');
@@ -46,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const savedName = localStorage.getItem('lingoName');
     const savedLang = localStorage.getItem('lingoLang');
+    const savedTargetLang = localStorage.getItem('lingoTargetLang');
 
     if (savedName) {
         usernameInput.value = savedName;
@@ -55,6 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedLang) {
         myLangSelect.value = savedLang;
         selfContactLang.innerText = myLangSelect.options[myLangSelect.selectedIndex].text;
+    }
+
+    if (savedTargetLang) {
+        targetLangSelect.value = savedTargetLang;
     }
 
     // Guardar cambios automáticamente si el nieto modifica el nombre o idioma
@@ -69,6 +76,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = myLangSelect.options[myLangSelect.selectedIndex].text;
         localStorage.setItem('lingoLang', val);
         selfContactLang.innerText = text;
+    });
+
+    targetLangSelect.addEventListener('change', () => {
+        localStorage.setItem('lingoTargetLang', targetLangSelect.value);
+    });
+
+    swapLangBtn.addEventListener('click', () => {
+        // Intercambio rápido de idiomas para conversaciones de ida y vuelta
+        const temp = myLangSelect.value;
+        myLangSelect.value = targetLangSelect.value;
+        targetLangSelect.value = temp;
+
+        // Forzamos el guardado y la actualización visual
+        myLangSelect.dispatchEvent(new Event('change'));
+        targetLangSelect.dispatchEvent(new Event('change'));
     });
 
     // --- 1. LÓGICA DE SALAS Y ENLACES MÁGICOS --- //
@@ -135,7 +157,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // MOSTRAR EL MENSAJE EN PANTALLA
         if (msg.deviceId === myDeviceId) {
             // Soy yo (lo envié yo mismo)
-            addChatBubble(currentUser, msg.originalText, msg.originalText, true, miIdioma);
+            // En MODO VIAJE, el teléfono traduce y "habla en voz alta" mi propio mensaje al idioma de la otra persona
+            const idiomaViaje = targetLangSelect.value;
+            let traduccionViaje = msg.originalText;
+
+            if (msg.originalLang.split('-')[0] !== idiomaViaje.split('-')[0]) {
+                traduccionViaje = await translateText(msg.originalText, msg.originalLang, idiomaViaje);
+            }
+
+            addChatBubble(currentUser, msg.originalText, traduccionViaje, true, idiomaViaje);
+
+            // Hablamos en voz alta la traducción en nuestro propio celular (Para la persona de en frente)
+            if (!window.isInitialLoad) {
+                speakText(traduccionViaje, idiomaViaje);
+            }
         } else {
             // Viene de un familiar (Entrante)
             statusText.innerText = 'Mensaje entrante...';
