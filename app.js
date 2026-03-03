@@ -13,7 +13,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const myDeviceId = Math.random().toString(36).substring(2, 12);
+let myDeviceId = localStorage.getItem('dialecta_device_id');
+if (!myDeviceId) {
+    myDeviceId = Math.random().toString(36).substring(2, 12);
+    localStorage.setItem('dialecta_device_id', myDeviceId);
+}
 
 window.isInitialLoad = true;
 setTimeout(() => { window.isInitialLoad = false; }, 2000); // 2 segs para ignorar audios viejos al cargar
