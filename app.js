@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const myLangSelect = document.getElementById('my-lang');
     const targetLangSelect = document.getElementById('target-lang');
     const swapLangBtn = document.getElementById('swap-lang-btn');
+    const myFlag = document.getElementById('my-flag');
+    const targetFlag = document.getElementById('target-flag');
     const usernameInput = document.getElementById('username');
     const chatHistory = document.getElementById('chat-history');
     const roomIdDisplay = document.getElementById('room-id-display');
@@ -203,17 +205,29 @@ document.addEventListener('DOMContentLoaded', () => {
         selfContactName.innerText = val ? val + t.youString : t.noNameString;
     });
 
+    const flagMap = {
+        'es-ES': '🇪🇸', 'en-US': '🇺🇸', 'fr-FR': '🇫🇷', 'de-DE': '🇩🇪',
+        'it-IT': '🇮🇹', 'pt-BR': '🇧🇷', 'ja-JP': '🇯🇵', 'zh-CN': '🇨🇳'
+    };
+
     myLangSelect.addEventListener('change', () => {
         const val = myLangSelect.value;
         const text = myLangSelect.options[myLangSelect.selectedIndex].text;
         localStorage.setItem('lingoLang', val);
         selfContactLang.innerText = text;
+        if (myFlag) myFlag.innerText = flagMap[val] || '🌐';
         updateUI(); // Traducir la interfaz instantaneamente al cambiar origen
     });
 
     targetLangSelect.addEventListener('change', () => {
-        localStorage.setItem('lingoTargetLang', targetLangSelect.value);
+        const val = targetLangSelect.value;
+        localStorage.setItem('lingoTargetLang', val);
+        if (targetFlag) targetFlag.innerText = flagMap[val] || '🌐';
     });
+
+    // Setear flags inicialmente
+    if (myFlag) myFlag.innerText = flagMap[myLangSelect.value] || '🌐';
+    if (targetFlag) targetFlag.innerText = flagMap[targetLangSelect.value] || '🌐';
 
     swapLangBtn.addEventListener('click', () => {
         // Intercambio rápido de idiomas para conversaciones de ida y vuelta

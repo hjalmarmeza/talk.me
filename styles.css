@@ -679,9 +679,91 @@ body {
     transition: color 0.3s;
 }
 
+/* Panel de Acción Inferior Integrado */
+.bottom-action-panel {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* El Pill (Cápsula) de Idiomas */
+.modern-selectors {
+    width: 100%;
+    background: rgba(40, 40, 60, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    /* Dejamos espacio abajo para el botón de micrófono que se superpone */
+    padding-bottom: 25px;
+    margin-bottom: -45px;
+    /* Tira del micrófono hacia arriba */
+}
+
+/* Modificaciones a los Selectores dentro del nuevo diseño */
+.modern-selectors .select-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: center;
+}
+
+.flag-icon {
+    font-size: 20px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.bold-select {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: auto;
+    text-align: center;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.bold-select:focus {
+    outline: none;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Botón Intercambiar del Medio */
+.modern-selectors .swap-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0 10px;
+}
+
+.modern-selectors .swap-btn:hover {
+    color: var(--accent-primary);
+    transform: scale(1.1);
+}
+
 /* Envoltorio del botón para las ondas animadas */
 .ptt-wrapper {
     position: relative;
+    z-index: 10;
     width: 90px;
     height: 90px;
     display: flex;

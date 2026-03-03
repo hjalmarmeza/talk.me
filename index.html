@@ -119,44 +119,6 @@
                     </div>
                 </div>
 
-                <div class="lang-group">
-                    <label><i class="ph ph-translate"></i> <span data-i18n="meLabel">Yo</span> <i
-                            class="ph ph-arrow-right"></i> <span data-i18n="otherPersonLabel">Otra
-                            Persona:</span></label>
-                    <div class="travel-selectors">
-                        <div class="select-wrapper">
-                            <select id="my-lang" class="glass-select">
-                                <option value="es-ES" data-i18n="langES" selected>Español</option>
-                                <option value="en-US" data-i18n="langEN">English (US)</option>
-                                <option value="fr-FR" data-i18n="langFR">Français</option>
-                                <option value="de-DE" data-i18n="langDE">Deutsch</option>
-                                <option value="it-IT" data-i18n="langIT">Italiano</option>
-                                <option value="pt-BR" data-i18n="langPT">Português (BR)</option>
-                                <option value="ja-JP" data-i18n="langJA">日本語</option>
-                                <option value="zh-CN" data-i18n="langZH">中文</option>
-                            </select>
-                            <i class="ph ph-caret-down select-icon"></i>
-                        </div>
-
-                        <button id="swap-lang-btn" class="swap-btn" title="Intercambiar Idiomas">
-                            <i class="ph ph-arrows-left-right"></i>
-                        </button>
-
-                        <div class="select-wrapper">
-                            <select id="target-lang" class="glass-select">
-                                <option value="en-US" data-i18n="langEN" selected>English (US)</option>
-                                <option value="es-ES" data-i18n="langES">Español</option>
-                                <option value="fr-FR" data-i18n="langFR">Français</option>
-                                <option value="de-DE" data-i18n="langDE">Deutsch</option>
-                                <option value="it-IT" data-i18n="langIT">Italiano</option>
-                                <option value="pt-BR" data-i18n="langPT">Português (BR)</option>
-                                <option value="ja-JP" data-i18n="langJA">日本語</option>
-                                <option value="zh-CN" data-i18n="langZH">中文</option>
-                            </select>
-                            <i class="ph ph-caret-down select-icon"></i>
-                        </div>
-                    </div>
-                </div>
             </div>
         </header>
 
@@ -175,13 +137,49 @@
         <footer class="ptt-controls">
             <div class="status-indicator" id="status-text">Listo para transmitir</div>
 
-            <div class="ptt-wrapper">
-                <div class="ripple-ring rings-1"></div>
-                <div class="ripple-ring rings-2"></div>
+            <div class="bottom-action-panel">
+                <div class="travel-selectors modern-selectors">
+                    <div class="select-wrapper">
+                        <span class="flag-icon" id="my-flag">🇪🇸</span>
+                        <select id="my-lang" class="glass-select bold-select">
+                            <option value="es-ES" data-i18n="langES" selected>Español</option>
+                            <option value="en-US" data-i18n="langEN">English (US)</option>
+                            <option value="fr-FR" data-i18n="langFR">Français</option>
+                            <option value="de-DE" data-i18n="langDE">Deutsch</option>
+                            <option value="it-IT" data-i18n="langIT">Italiano</option>
+                            <option value="pt-BR" data-i18n="langPT">Português (BR)</option>
+                            <option value="ja-JP" data-i18n="langJA">日本語</option>
+                            <option value="zh-CN" data-i18n="langZH">中文</option>
+                        </select>
+                    </div>
 
-                <button id="ptt-button" class="ptt-btn" aria-label="Mantener presionado para hablar">
-                    <i class="ph-fill ph-microphone"></i>
-                </button>
+                    <button id="swap-lang-btn" class="swap-btn" title="Intercambiar Idiomas">
+                        <i class="ph ph-arrows-left-right"></i>
+                    </button>
+
+                    <div class="select-wrapper">
+                        <span class="flag-icon" id="target-flag">🇺🇸</span>
+                        <select id="target-lang" class="glass-select bold-select">
+                            <option value="en-US" data-i18n="langEN" selected>English (US)</option>
+                            <option value="es-ES" data-i18n="langES">Español</option>
+                            <option value="fr-FR" data-i18n="langFR">Français</option>
+                            <option value="de-DE" data-i18n="langDE">Deutsch</option>
+                            <option value="it-IT" data-i18n="langIT">Italiano</option>
+                            <option value="pt-BR" data-i18n="langPT">Português (BR)</option>
+                            <option value="ja-JP" data-i18n="langJA">日本語</option>
+                            <option value="zh-CN" data-i18n="langZH">中文</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="ptt-wrapper">
+                    <div class="ripple-ring rings-1"></div>
+                    <div class="ripple-ring rings-2"></div>
+
+                    <button id="ptt-button" class="ptt-btn" aria-label="Mantener presionado para hablar">
+                        <i class="ph-fill ph-microphone"></i>
+                    </button>
+                </div>
             </div>
 
             <p class="instruction" data-i18n="tapToTalk">Toca para hablar</p>
