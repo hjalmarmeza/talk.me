@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetLangSelect = document.getElementById('target-lang');
     const swapLangBtn = document.getElementById('swap-lang-btn');
     const voiceSelect = document.getElementById('voice-select');
+    const testVoiceBtn = document.getElementById('test-voice-btn');
     const usernameInput = document.getElementById('username');
     const chatHistory = document.getElementById('chat-history');
     const roomIdDisplay = document.getElementById('room-id-display');
@@ -167,6 +168,31 @@ document.addEventListener('DOMContentLoaded', () => {
     voiceSelect.addEventListener('change', () => {
         localStorage.setItem('lingoVoice', voiceSelect.value);
     });
+
+    // Test de voz seleccionada
+    if (testVoiceBtn) {
+        testVoiceBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const baseLang = myLangSelect.value;
+            const msgs = {
+                'es-ES': 'Hola, probando 1, 2, 3. Así es como suena mi voz en español. ¿Me copias?',
+                'en-US': 'Hello, testing 1, 2, 3. This is what my voice sounds like. Do you read me?',
+                'fr-FR': 'Bonjour, test 1, 2, 3. Voici comment je sonne en français. Tu me reçois ?'
+            };
+            const textToTest = msgs[baseLang] || msgs['en-US'];
+
+            const icon = testVoiceBtn.querySelector('i');
+            icon.classList.remove('ph-play-circle');
+            icon.classList.add('ph-speaker-high');
+
+            speakText(textToTest, baseLang);
+
+            setTimeout(() => {
+                icon.classList.remove('ph-speaker-high');
+                icon.classList.add('ph-play-circle');
+            }, 3000);
+        });
+    }
 
     swapLangBtn.addEventListener('click', () => {
         // Intercambio rápido de idiomas para conversaciones de ida y vuelta

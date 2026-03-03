@@ -83,11 +83,17 @@
                     <div class="input-group" style="max-width: 100%;">
                         <label for="voice-select"><i class="ph ph-speaker-high"></i> <span
                                 data-i18n="voiceLabel">Voz:</span></label>
-                        <div class="select-wrapper">
-                            <select id="voice-select" class="glass-select">
-                                <option value="" data-i18n="autoVoice">Automática</option>
-                            </select>
-                            <i class="ph ph-caret-down select-icon"></i>
+                        <div class="select-wrapper" style="display:flex; gap: 8px;">
+                            <div style="position: relative; flex: 1;">
+                                <select id="voice-select" class="glass-select">
+                                    <option value="" data-i18n="autoVoice">Automática</option>
+                                </select>
+                                <i class="ph ph-caret-down select-icon"></i>
+                            </div>
+                            <button id="test-voice-btn" class="glass-btn-small" aria-label="Probar Voz"
+                                style="padding: 0 12px; height: auto; flex-shrink: 0;" title="Escuchar voz">
+                                <i class="ph-fill ph-play-circle" style="font-size: 20px;"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
