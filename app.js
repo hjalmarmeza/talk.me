@@ -552,10 +552,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 6. SIMULACIÓN DEL BOTÓN WALKIE TALKIE --- //
     const startWalkieTalkie = (e) => {
-        if (e) e.preventDefault();
+        // Evitamos doble disparo en móviles
+        if (e && e.cancelable) e.preventDefault();
 
         if (!usernameInput.value.trim()) {
-            alert("Por favor, ingresa tu nombre antes de hablar.");
+            alert(getT().alertName);
             usernameInput.focus();
             return;
         }
@@ -565,18 +566,43 @@ document.addEventListener('DOMContentLoaded', () => {
         isRecording = true;
         pttBtn.classList.add('recording');
         document.body.classList.add('is-recording');
+        statusText.innerText = getT().statusListening;
 
         // Configuramos para que escuche en el idioma que tiene marcado
         recognition.lang = myLangSelect.value;
-        recognition.start();
+        try {
+            recognition.start();
+        } catch (err) {
+            console.error("No se pudo iniciar reconocimiento:", err);
+            statusText.innerText = "Error: micrófono ocupado";
+            isRecording = false;
+            pttBtn.classList.remove('recording');
+            document.body.classList.remove('is-recording');
+        }
     };
 
     const stopWalkieTalkie = (e) => {
-        if (e) e.preventDefault();
+        if (e && e.cancelable) e.preventDefault();
         if (!isRecording || !recognition) return;
 
         // Al soltar el boton paramos de escuchar y procesamos lo oído
-        recognition.stop();
+        try {
+            recognition.stop();
+        } catch (err) {
+            console.error(err);
+        }
+
+        // Respaldo por si el navegador se queda atascado (pasa en versiones antiguas de iOS/Chrome)
+        setTimeout(() => {
+            if (isRecording) {
+                isRecording = false;
+                pttBtn.classList.remove('recording');
+                document.body.classList.remove('is-recording');
+                if (statusText.innerText === getT().statusListening || statusText.innerText === "Escuchando...") {
+                    statusText.innerText = getT().statusReady;
+                }
+            }
+        }, 1500);
     };
 
     // Eventos PC (Mouse)
@@ -584,16 +610,16 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('mouseup', stopWalkieTalkie);
 
     // Eventos Móviles (Touch)
-    pttBtn.addEventListener('touchstart', startWalkieTalkie);
-    window.addEventListener('touchend', stopWalkieTalkie);
+    pttBtn.addEventListener('touchstart', startWalkieTalkie, { passive: false });
+    window.addEventListener('touchend', stopWalkieTalkie, { passive: false });
 
-    // Cancelar si salen de la ventana
+    // Cancelar si salen de la ventana o del botón bruscamente
     pttBtn.addEventListener('mouseleave', () => {
         if (isRecording) stopWalkieTalkie();
     });
+    pttBtn.addEventListener('touchcancel', stopWalkieTalkie);
 
-    // Reproducir ejemplos estáticos que iniciaron para prueba original
-    // Limpiamos los ejemplos estáticos del HTML para que se vea real
+    // Eliminar mensaje base de bienvenida original (limpieza final)
     const initialBubbles = document.querySelectorAll('.message-bubble');
     initialBubbles.forEach(b => b.remove());
 
