@@ -446,6 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusText.innerText = getT().statusSending;
 
             const currentUser = usernameInput.value.trim() || getT().anon;
+            const miIdioma = myLangSelect.value;
 
             // ENVÍO REAL A FIREBASE
             // Esto mandará el mensaje a la nube de Google. Al recibirlo de vuelta (vía onChildAdded arriba),
