@@ -717,19 +717,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }).catch((error) => {
                     console.error("Error de Firebase:", error);
                     alert("Error de conexión al enviar el mensaje.");
-                    statusText.innerText = getT().statusReady;
-                });
-
-                setTimeout(() => {
-                    if (statusText.innerText === getT().statusSending) {
+                }).finally(() => {
+                    // Limpieza garantizada después de enviar o fallar
+                    setTimeout(() => {
                         statusText.innerText = getT().statusReady;
-                    }
-                }, 1000);
+                    }, 1200);
+                });
             } else {
-                // Si paró de grabar y no captó ningún texto
-                if (statusText.innerText === getT().statusListening || statusText.innerText === "Escuchando...") {
-                    statusText.innerText = getT().statusReady;
-                }
+                // Si paró de grabar y no captó ningún finalTranscript
+                statusText.innerText = getT().statusReady;
             }
 
             finalTranscript = ''; // Limpiar siempre al terminar
@@ -787,13 +783,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(err);
             }
 
-            // Respaldo por si el navegador se queda atascado sin disparar onend
+            // Respaldo de Limpieza Suprema: Si el navegador mata el onend nativo, la UI igual se repondrá
             setTimeout(() => {
-                // Forzamos el trigger de onend si finalTranscript tiene algo atorado o la interfaz sigue en procesando
-                if (recognition.onend) {
-                    recognition.onend();
-                }
-            }, 1000);
+                isRecording = false;
+                pttBtn.classList.remove('recording');
+                document.body.classList.remove('is-recording');
+                statusText.innerText = getT().statusReady;
+                if (instructionEl) instructionEl.innerText = getT().tapToTalk;
+            }, 2500);
         }
     };
 
