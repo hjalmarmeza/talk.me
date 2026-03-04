@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Variables de Estado
     let isRecording = false;
     let finalTranscript = '';
+    let interimTranscript = '';
     let isLockedMode = false;
 
     // --- I18N (INTERNACIONALIZACIÓN DE LA INTERFAZ) --- //
@@ -530,9 +531,8 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition = new SpeechRecognition();
         // iOS/Safari: continuous=true causa bloqueo silencioso del mic. Usamos false con auto-reinicio manual.
         recognition.continuous = !isMobileSafari;
-        // En iOS desactivamos interimResults para aliviar la CPU del dispositivo móvil
-        // y evitar que el dispositivo "se esfuerce demasiado" con actualizaciones constantes.
-        recognition.interimResults = !isMobileSafari;
+        // Activamos interimResults para no perder frases si el usuario apaga manualmente (1 Toque) rápido:
+        recognition.interimResults = true;
     } else {
         alert(getT().unsupported);
     }
@@ -729,10 +729,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recognition.onresult = (event) => {
             resetSilenceTimer(); // El usuario habló, reseteamos el reloj
-            // Acumular fragmentos sin enviarlos aún (se envían al soltar el botón Walkie-Talkie)
+            interimTranscript = '';
+
+            // Acumular fragmentos
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
                     finalTranscript += event.results[i][0].transcript + " ";
+                } else {
+                    interimTranscript += event.results[i][0].transcript + " ";
                 }
             }
         };
@@ -757,9 +761,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         recognition.onend = () => {
-            // Recoger el texto acumulado del ciclo que acaba de terminar
-            let rawText = finalTranscript.trim();
+            // Recoger el texto acumulado del ciclo que acaba de terminar, sumando si quedó algo pendiente en el interim
+            let rawText = (finalTranscript + " " + interimTranscript).trim();
             finalTranscript = '';
+            interimTranscript = '';
 
             // Si hay texto, lo preparamos y enviamos/hablamos
             if (rawText) {
@@ -913,6 +918,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isRecording = true;
         finalTranscript = '';
+        interimTranscript = '';
         pttBtn.classList.add('recording');
         document.body.classList.add('is-recording');
         statusText.innerText = getT().statusListening;
@@ -954,7 +960,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const stopRecordingSession = () => {
         if (!isRecording) return;
-        stopVisualRecording();
+
+        // No llamamos a stopVisualRecording acá arriba para no falsear isRecording
+        // hasta que detengamos WebSpeech y él decida pasar a onend de forma natural.
 
         if (statusText.innerText === getT().statusListening || statusText.innerText === "Escuchando...") {
             statusText.innerText = "Procesando...";
@@ -966,11 +974,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(err);
         }
 
+        // Proceder visualmente a detener la app
+        stopVisualRecording();
+
         // Respaldo de Limpieza Suprema
         setTimeout(() => {
-            if (isRecording === false && finalTranscript !== '') {
+            if (isRecording === false && (finalTranscript !== '' || interimTranscript !== '')) {
                 // Si pasaron 2 segundos de haber presionado STOP y onend nunca disparó, forzamos enviar y limpiar.
-                let rawText = finalTranscript.trim();
+                let rawText = (finalTranscript + " " + interimTranscript).trim();
                 if (rawText) {
                     rawText = rawText.replace(/ (pero|porque|aunque|y|but|because|although|and|mais|parce que|et) /gi, ', $1 ');
                     rawText = rawText.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
@@ -979,10 +990,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     sendMessageToFirebase(rawText);
                 }
                 finalTranscript = '';
+                interimTranscript = '';
             }
-            stopVisualRecording();
-            if (statusText) statusText.innerText = getT().statusReady;
-        }, 2000);
+            if (statusText && statusText.innerText === "Procesando...") {
+                statusText.innerText = getT().statusReady;
+            }
+        }, 1500);
     };
 
     // Eliminamos el listener de "click" y nos movemos a "Pointer Events" unificados nativos (Mouse y Touch a la vez)
