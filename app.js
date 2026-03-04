@@ -729,29 +729,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recognition.onresult = (event) => {
             resetSilenceTimer(); // El usuario habló, reseteamos el reloj
+            let currentInterim = '';
 
-            let tempFinal = '';
-            let tempInterim = '';
-
-            // Reconstruimos SIEMPRE la frase final
-            for (let i = 0; i < event.results.length; ++i) {
+            // Algoritmo Canónico (MDN) que NO falla en Android y Safari
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
-                    tempFinal += event.results[i][0].transcript + " ";
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                } else {
+                    currentInterim += event.results[i][0].transcript;
                 }
             }
 
-            // Android Chrome Bug Fix (Cumulative Transcript):
-            // Solo tomamos el ÚLTIMO borrador de todos los resultados emitidos si no es final,
-            // en lugar de sumarlos todos, para neutralizar el efecto bola de nieve en Android.
-            if (event.results.length > 0) {
-                const lastResult = event.results[event.results.length - 1];
-                if (!lastResult.isFinal) {
-                    tempInterim = lastResult[0].transcript;
-                }
-            }
-
-            finalTranscript = tempFinal;
-            interimTranscript = tempInterim;
+            interimTranscript = currentInterim; // Reemplazamos, ¡nunca sumamos a interim!
         };
 
         recognition.onerror = (event) => {
