@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRecording = false;
     let finalTranscript = '';
     let interimTranscript = '';
+    let sessionTranscript = '';
     let isLockedMode = false;
 
     // --- I18N (INTERNACIONALIZACIÓN DE LA INTERFAZ) --- //
@@ -769,16 +770,10 @@ document.addEventListener('DOMContentLoaded', () => {
             finalTranscript = '';
             interimTranscript = '';
 
-            // Si hay texto, lo preparamos y enviamos/hablamos
+            // Acumulamos en la sesión global en lugar de enviarlo de golpe.
+            // Esto soluciona que la frase se traduzca de forma cortada si el usuario toma aire / respira.
             if (rawText) {
-                // Truco de Puntuación
-                rawText = rawText.replace(/ (pero|porque|aunque|y|but|because|although|and|mais|parce que|et) /gi, ', $1 ');
-                rawText = rawText.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
-                rawText = rawText.charAt(0).toUpperCase() + rawText.slice(1);
-                if (!/[.!?]$/.test(rawText)) {
-                    rawText += ".";
-                }
-                sendMessageToFirebase(rawText);
+                sessionTranscript += (sessionTranscript ? " " : "") + rawText;
             }
 
             // SI SIGUE GRABANDO (Walkie-Talkie normal no soltado O Modo Continuous/Lock activado)
@@ -788,8 +783,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!isRecording) return; // Si el usuario apagó el lock manualmente en el interín
 
                     if (isTTSPlaying) {
-                        // El celular está leyendo una traducción en voz alta, esperamos medio segundo más.
-                        // Esto EVITA el Efecto Eco (que el propio celular se escuche a sí mismo y se traduzca).
                         setTimeout(attemptRestart, 500);
                         return;
                     }
@@ -804,7 +797,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Si llegamos aquí, isRecording es falso (El usuario soltó tap o quitó el candado manualmente sin texto extra)
+            // Si llegamos aquí, isRecording es falso (El usuario cortó explícitamente y podemos procesar toda la frase)
+            if (sessionTranscript) {
+                let textToSend = sessionTranscript.trim();
+                textToSend = textToSend.replace(/ (pero|porque|aunque|y|but|because|although|and|mais|parce que|et) /gi, ', $1 ');
+                textToSend = textToSend.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
+                textToSend = textToSend.charAt(0).toUpperCase() + textToSend.slice(1);
+                if (!/[.!?]$/.test(textToSend)) {
+                    textToSend += ".";
+                }
+                sendMessageToFirebase(textToSend);
+                sessionTranscript = '';
+            }
+
             isRecording = false;
             pttBtn.classList.remove('recording');
             document.body.classList.remove('is-recording');
@@ -922,6 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isRecording = true;
         finalTranscript = '';
         interimTranscript = '';
+        sessionTranscript = ''; // Inicializamos limpia la sesión de grabación actual
         pttBtn.classList.add('recording');
         document.body.classList.add('is-recording');
         statusText.innerText = getT().statusListening;
@@ -982,9 +988,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Respaldo de Limpieza Suprema
         setTimeout(() => {
-            if (isRecording === false && (finalTranscript !== '' || interimTranscript !== '')) {
-                // Si pasaron 2 segundos de haber presionado STOP y onend nunca disparó, forzamos enviar y limpiar.
-                let rawText = (finalTranscript + " " + interimTranscript).trim();
+            if (isRecording === false && (finalTranscript !== '' || interimTranscript !== '' || sessionTranscript !== '')) {
+                // Si pasaron 1.5 segundos de haber presionado STOP y onend nunca disparó, forzamos enviar y limpiar.
+                let rawText = (sessionTranscript + " " + finalTranscript + " " + interimTranscript).trim();
                 if (rawText) {
                     rawText = rawText.replace(/ (pero|porque|aunque|y|but|because|although|and|mais|parce que|et) /gi, ', $1 ');
                     rawText = rawText.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
@@ -994,6 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 finalTranscript = '';
                 interimTranscript = '';
+                sessionTranscript = '';
             }
             if (statusText && statusText.innerText === "Procesando...") {
                 statusText.innerText = getT().statusReady;
