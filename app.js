@@ -1069,9 +1069,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     { logger: m => console.log("OCR:", m.status) }
                 );
 
+                // --- SMART CLEANUP DEL OCR ---
+                // Tesseract saca mucha basura (símbolos, barras de navegador, avisos de copyright) si la foto es a una pantalla
+                let cleanText = text
+                    .replace(/[\n\r]+/g, ' ') // Convertir saltos de línea a espacios
+                    .replace(/[|<>:=«»_*~]/g, '') // Eliminar caracteres de interfaz extraños
+                    .replace(/\s{2,}/g, ' ') // Eliminar espacios múltiples
+                    .trim();
+
+                // Eliminar frases trampa o "Boilerplate" común de capturas de pantalla web
+                cleanText = cleanText.replace(/Las imágenes pueden estar sujetas a derechos de autor\.?/gi, '');
+                cleanText = cleanText.replace(/Másinformación|Más información/gi, '');
+                cleanText = cleanText.replace(/Amazon\.com/gi, ''); // Remover menciones a Amazon de capturas
+
+                // Mayúscula inicial para estética
+                cleanText = cleanText.trim();
+                if (cleanText.length > 0) {
+                    cleanText = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
+                }
+
                 const manualTextInput = document.getElementById('manual-text-input');
                 if (manualTextInput) {
-                    manualTextInput.value = text.trim();
+                    manualTextInput.value = cleanText;
                     manualTextInput.focus(); // Lo dejamos en caja para que el usuario pueda enviarlo/traducirlo con el botón
                 }
 
