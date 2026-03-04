@@ -50,6 +50,28 @@ body {
     -ms-overflow-style: none !important;
     /* Evitar los 3 puntos diagonales de Safari/Chrome (Resizer Handle) */
     resize: none !important;
+    /* Forzar estilo limpio en WebKit */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ocultar COMPLETAMENTE el resizer/corner nativo en TODOS los elementos */
+*::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner,
+*::-webkit-resizer {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+    visibility: hidden !important;
+    -webkit-appearance: none !important;
 }
 
 /* Ocultar barra de desplazamiento COMPLETA (Y esquinas/resizers) en WebKit globalmente */
@@ -155,6 +177,8 @@ body {
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-glass);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden !important;
+    resize: none !important;
 }
 
 @media (min-width: 481px) {

@@ -476,9 +476,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let recognition = null;
     let synth = window.speechSynthesis;
 
+    // Detectar si es iOS / Safari móvil (NO soportan continuous=true de forma fiable)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isMobileSafari = isIOS || /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
-        recognition.continuous = true; // Graba sin parar hasta soltar el botón
+        // iOS/Safari: continuous=true causa bloqueo silencioso del mic. Usamos false con auto-reinicio manual.
+        recognition.continuous = !isMobileSafari;
         recognition.interimResults = true; // Permite procesar resultados largos sin cortar
     } else {
         alert(getT().unsupported);
@@ -840,15 +845,42 @@ document.addEventListener('DOMContentLoaded', () => {
             if (instructionEl) instructionEl.innerText = getT().tapToStop;
 
             recognition.lang = myLangSelect.value;
-            try {
-                recognition.start();
-            } catch (err) {
-                console.error("No se pudo iniciar reconocimiento:", err);
-                statusText.innerText = "Error: micrófono ocupado";
-                isRecording = false;
-                pttBtn.classList.remove('recording');
-                document.body.classList.remove('is-recording');
-                if (instructionEl) instructionEl.innerText = getT().tapToTalk;
+
+            // En iOS/Safari el mic necesita un warm-up con getUserMedia primero
+            // para que SpeechRecognition pueda acceder al hardware del micrófono.
+            const startRecognition = () => {
+                try {
+                    recognition.start();
+                } catch (err) {
+                    console.error("No se pudo iniciar reconocimiento:", err);
+                    // Si ya estaba iniciado (InvalidStateError), ignoramos este error
+                    if (err.name !== 'InvalidStateError') {
+                        statusText.innerText = "Error: micrófono ocupado";
+                        isRecording = false;
+                        pttBtn.classList.remove('recording');
+                        document.body.classList.remove('is-recording');
+                        if (instructionEl) instructionEl.innerText = getT().tapToTalk;
+                    }
+                }
+            };
+
+            if (isMobileSafari && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then((stream) => {
+                        // Cerramos el stream de warm-up inmediatamente (SpeechRecognition maneja el suyo)
+                        stream.getTracks().forEach(track => track.stop());
+                        startRecognition();
+                    })
+                    .catch((err) => {
+                        console.error("Permiso de micrófono denegado:", err);
+                        statusText.innerText = "Permiso denegado";
+                        isRecording = false;
+                        pttBtn.classList.remove('recording');
+                        document.body.classList.remove('is-recording');
+                        if (instructionEl) instructionEl.innerText = getT().tapToTalk;
+                    });
+            } else {
+                startRecognition();
             }
         } else {
             // Detener grabación -> Respuesta Inmediata en la Interfaz (UI)
