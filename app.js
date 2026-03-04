@@ -657,15 +657,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         recognition.onerror = (event) => {
-            if (event.error === 'aborted' || event.error === 'no-speech') {
-                isRecording = false;
-                pttBtn.classList.remove('recording');
-                document.body.classList.remove('is-recording');
-                const instructionEl = document.querySelector('.instruction');
-                if (instructionEl) instructionEl.innerText = getT().tapToTalk;
-                if (statusText && (statusText.innerText === getT().statusListening || statusText.innerText === "Escuchando...")) {
-                    statusText.innerText = getT().statusReady;
-                }
+            if (event.error === 'no-speech') {
+                // Silencios largos normales: NO matamos la grabación, 
+                // dejamos que onend la reinicie automáticamente.
+                return;
+            }
+            if (event.error === 'aborted') {
+                // El usuario o el sistema la canceló. Dejamos que onend haga su trabajo de enviar si queda texto.
                 return;
             }
             console.error("Error de micrófono:", event.error);
@@ -818,14 +816,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Evitamos doble disparo
         if (e && e.cancelable) e.preventDefault();
 
-        // WARM-UP DEL WEBSPEECH ENGINE SÍNCRONO: Desbloquea iOS/Safari permitiéndole reproducir después asincronamente
-        if (synth && synth.state === 'paused') synth.resume();
-        if (synth) {
-            let ut = new SpeechSynthesisUtterance('');
-            ut.volume = 0;
-            synth.speak(ut);
-        }
-
         // En Modo Sala es obligatorio el nombre, en Modo Solo es opcional.
         if (currentMode === 'room' && !usernameInput.value.trim()) {
             alert(getT().alertName);
@@ -836,6 +826,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const instructionEl = document.querySelector('.instruction');
 
         if (!isRecording) {
+            // WARM-UP DEL WEBSPEECH ENGINE SÍNCRONO: Desbloquea iOS/Safari permitiéndole reproducir después asincronamente.
+            // LO HACEMOS SOLO AL INICIAR PARA NO CAUSAR UN DEADLOCK DE MICROFONO/ALTAVOZ EN IOS SAFARI AL DETENER.
+            if (synth && synth.state === 'paused') synth.resume();
+            if (synth) {
+                let ut = new SpeechSynthesisUtterance('');
+                ut.volume = 0;
+                synth.speak(ut);
+            }
+
             // Empezar a grabar
             if (!recognition) return;
             isRecording = true;
@@ -875,12 +874,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Respaldo de Limpieza Suprema: Si el navegador mata el onend nativo, la UI igual se repondrá
             setTimeout(() => {
-                isRecording = false;
+                if (isRecording === false && finalTranscript !== '') {
+                    // Si pasaron 2 segundos de haber presionado STOP y onend nunca disparó (Bug de Android), forzamos enviar y limpiar.
+                    let rawText = finalTranscript.trim();
+                    if (rawText) {
+                        rawText = rawText.replace(/ (pero|porque|aunque|y|but|because|although|and|mais|parce que|et) /gi, ', $1 ');
+                        rawText = rawText.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
+                        rawText = rawText.charAt(0).toUpperCase() + rawText.slice(1);
+                        if (!/[.!?]$/.test(rawText)) rawText += ".";
+                        sendMessageToFirebase(rawText);
+                    }
+                    finalTranscript = '';
+                }
                 pttBtn.classList.remove('recording');
                 document.body.classList.remove('is-recording');
-                statusText.innerText = getT().statusReady;
+                if (statusText) statusText.innerText = getT().statusReady;
                 if (instructionEl) instructionEl.innerText = getT().tapToTalk;
-            }, 2500);
+            }, 2000);
         }
     };
 
