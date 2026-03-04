@@ -1,6 +1,6 @@
 {
-    "name": "talk.io",
-    "short_name": "talk.io",
+    "name": "Dialecta",
+    "short_name": "Dialecta",
     "description": "Sala de Audio-Traducción Privada & Tiempo Real",
     "start_url": "./index.html",
     "display": "standalone",
