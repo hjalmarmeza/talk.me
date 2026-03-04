@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const val = usernameInput.value.trim();
-        selfContactName.innerText = val ? val + t.youString : t.noNameString;
+        if (selfContactName) selfContactName.innerText = val ? val + t.youString : t.noNameString;
 
         if (!isRecording && statusText.innerText !== t.statusIncoming) {
             statusText.innerText = t.statusReady;
@@ -173,12 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (savedName) {
         usernameInput.value = savedName;
-        selfContactName.innerText = savedName + " (Tú)";
+        if (selfContactName) selfContactName.innerText = savedName + " (Tú)";
     }
 
     if (savedLang) {
         myLangSelect.value = savedLang;
-        selfContactLang.innerText = myLangSelect.options[myLangSelect.selectedIndex].text;
+        if (selfContactLang) selfContactLang.innerText = myLangSelect.options[myLangSelect.selectedIndex].text;
     }
 
     if (savedTargetLang) {
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = e.target.value.trim();
         const t = getT();
         localStorage.setItem('lingoName', val);
-        selfContactName.innerText = val ? val + t.youString : t.noNameString;
+        if (selfContactName) selfContactName.innerText = val ? val + t.youString : t.noNameString;
     });
 
     const flagMap = {
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = myLangSelect.value;
         const text = myLangSelect.options[myLangSelect.selectedIndex].text;
         localStorage.setItem('lingoLang', val);
-        selfContactLang.innerText = text;
+        if (selfContactLang) selfContactLang.innerText = text;
         if (myFlag) myFlag.innerText = flagMap[val] || '🌐';
         updateUI(); // Traducir la interfaz instantaneamente al cambiar origen
     });

@@ -168,48 +168,67 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* --- PILL TABS NAVIGATION (Floating Segmented Control) --- */
+/* --- PILL TABS NAVIGATION (Premium Dark iOS Style) --- */
 .pill-tabs-container {
     display: flex;
-    background: rgba(40, 40, 60, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #16161e;
+    /* Fondo hiper-oscuro como en iOS */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Borde supremamente sutil exterior */
     border-radius: 40px;
-    padding: 6px;
-    gap: 4px;
+    padding: 3px;
     width: 100%;
     max-width: 320px;
-    margin: 0 auto 16px auto;
-    /* 16px empuja al status-text */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin: 20px auto 10px auto;
+    /* Separación sobre él para alejarlo del micro */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(0, 0, 0, 0.5);
+    /* Sombra pesada */
+    align-items: center;
+}
+
+.pill-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 2px;
+    transition: opacity 0.2s;
 }
 
 .pill-tab {
     flex: 1;
     background: transparent;
-    border: none;
-    color: var(--text-secondary);
+    border: 2px solid transparent;
+    /* Preparar borde invisible para el active */
+    color: #8E8E93;
+    /* Color gris de texto inactivo estilo iOS */
     padding: 10px 14px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     text-align: center;
-    border-radius: 30px;
+    border-radius: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .pill-tab.active {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), inset 0 0 0 1.5px rgba(99, 102, 241, 0.6);
+    background: #2C2C34;
+    /* Gris oscuro mate en el interior de la cápsula */
+    color: #FFFFFF;
+    border-color: #0A84FF;
+    /* Borde Azul eléctrico iOS */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Ocultar la raya del divisor si alguno de los lados está activo (simulando comportamiento nativo de Segmented Control) */
+.pill-tab.active+.pill-divider,
+.pill-tab:has(+ .pill-divider):is(.active)~.pill-divider {
+    opacity: 0;
 }
 
 .pill-tab:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.05);
     color: white;
 }
 
