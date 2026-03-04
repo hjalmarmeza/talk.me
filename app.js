@@ -529,8 +529,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
-        // iOS/Safari: continuous=true causa bloqueo silencioso del mic. Usamos false con auto-reinicio manual.
-        recognition.continuous = !isMobileSafari;
+        // APAGADO OBLIGATORIO PARA DESTRUIR LA ANOMALÍA ACUMULATIVA DE SAMSUNG/ANDROID.
+        // Asegura que event.results nunca sume un historial infinito de repeticiones.
+        recognition.continuous = false;
         // Activamos interimResults para no perder frases si el usuario apaga manualmente (1 Toque) rápido:
         recognition.interimResults = true;
     } else {
@@ -729,18 +730,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recognition.onresult = (event) => {
             resetSilenceTimer(); // El usuario habló, reseteamos el reloj
-            let currentInterim = '';
+            let safeFinal = '';
+            let safeInterim = '';
 
-            // Algoritmo Canónico (MDN) que NO falla en Android y Safari
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
+            // Algoritmo Anti-Samsung-Duplication:
+            for (let i = 0; i < event.results.length; ++i) {
+                let segmentText = event.results[i][0].transcript;
+
                 if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript + ' ';
+                    // Si el motor de Android devuelve el historial acumulado en el nuevo segmento 
+                    // (ej: segment 1: "hola", segment 2: "hola a todos"), simplemente lo REEMPLAZAMOS
+                    // en lugar de sumarlo (lo que causaba el "hola hola a todos").
+                    if (safeFinal.length > 0 && segmentText.trim().toLowerCase().startsWith(safeFinal.trim().toLowerCase())) {
+                        safeFinal = segmentText + ' ';
+                    } else {
+                        safeFinal += segmentText + ' ';
+                    }
                 } else {
-                    currentInterim += event.results[i][0].transcript;
+                    // Los borradores (interim) no importa sumarlos, solo queremos ver la última foto
+                    safeInterim = segmentText;
                 }
             }
 
-            interimTranscript = currentInterim; // Reemplazamos, ¡nunca sumamos a interim!
+            finalTranscript = safeFinal;
+            interimTranscript = safeInterim;
         };
 
         recognition.onerror = (event) => {
