@@ -887,6 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const instructionEl = document.querySelector('.instruction');
     const lockIndicator = document.getElementById('lock-indicator');
     let touchStartY = 0;
+    let touchStartTime = 0;
     let isSwiping = false;
 
     const startRecordingSession = () => {
@@ -989,6 +990,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Si no estamos grabando, iniciamos el calentamiento
         if (startRecordingSession()) {
             touchStartY = e.clientY;
+            touchStartTime = Date.now();
             isSwiping = true;
 
             // Aparece el indicador fantasma de deslizar ligeramente arriba
@@ -1031,11 +1033,20 @@ document.addEventListener('DOMContentLoaded', () => {
         isSwiping = false;
         if (lockIndicator) lockIndicator.classList.remove('visible');
 
-        // REGLA 2: Si levantó el dedo y NO alcanzó a hacer Swipe-Up (modo Walkie-Talkie normal)
-        if (!isLockedMode) {
+        const pressDuration = Date.now() - touchStartTime;
+
+        // Si fue un toque rápido (Tap) (< 400ms), activamos el modo continuo ("Lock") automático.
+        if (pressDuration < 400 && !isLockedMode) {
+            isLockedMode = true;
+            pttBtn.classList.remove('recording');
+            pttBtn.classList.add('locked');
+            resetSilenceTimer();
+            if (instructionEl) instructionEl.innerText = "Modo Contínuo Activo";
+        }
+        // REGLA 2: Si levantó el dedo (Hold largo) y NO alcanzó a hacer Swipe-Up, se corta al soltar
+        else if (!isLockedMode) {
             stopRecordingSession();
         }
-        // Si estaba Locked, simplemente no hacemos nada. Escuchará de corrido hasta que pique de nuevo.
 
         pttBtn.releasePointerCapture(e.pointerId);
     });
