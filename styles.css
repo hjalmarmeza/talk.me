@@ -36,14 +36,23 @@
     /* Ocultar barras de scroll globalmente en todo el DOM */
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
+    /* Evitar los 3 puntos diagonales de Safari/Chrome (Resizer Handle) */
+    resize: none !important;
 }
 
-/* Ocultar scrollbar en WebKit (Chrome, Safari, Android) globalmente */
-::-webkit-scrollbar {
+/* Ocultar barra de desplazamiento COMPLETA (Y esquinas/resizers) en WebKit globalmente */
+::-webkit-scrollbar,
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-corner,
+::-webkit-resizer {
     width: 0px !important;
     height: 0px !important;
     background: transparent !important;
     display: none !important;
+    visibility: hidden !important;
 }
 
 body {

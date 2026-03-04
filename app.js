@@ -630,10 +630,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 2000);
         });
 
-        // Eliminar mensaje base de bienvenida
-        const systemMsg = chatHistory.querySelector('.system-message');
-        if (systemMsg) systemMsg.style.display = 'none';
-
         chatHistory.appendChild(bubble);
         chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll abajo
     }
