@@ -33,6 +33,17 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* Ocultar barras de scroll globalmente en todo el DOM */
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+/* Ocultar scrollbar en WebKit (Chrome, Safari, Android) globalmente */
+::-webkit-scrollbar {
+    width: 0px !important;
+    height: 0px !important;
+    background: transparent !important;
+    display: none !important;
 }
 
 body {
