@@ -567,11 +567,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    let isTTSPlaying = false;
+
     // --- 3. FUNCIÓN PARA HABLAR EL TEXTO TRADUCIDO --- //
     function speakText(text, lang) {
         if (!synth || !text) return;
-        // No hablar mientras el usuario está grabando (evita que el mic capture la voz sintetizada)
-        if (isRecording) return;
+
+        isTTSPlaying = true; // Activar el flag para detener el auto-reinicio del micrófono
+        // if (isRecording) return; // ELIMINADO: Queremos que HABLE aunque el candado (isLockedMode) esté puesto.
 
         // Limpiar caché TTS interno por seguridad de sistema
         synth.cancel();
@@ -641,10 +644,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (fallbackVoice) utterance.voice = fallbackVoice;
             }
 
-            // Efecto visual al hablar
+            // Efecto visual y control de cicloTTS al final
             utterance.onstart = () => { document.body.style.boxShadow = "inset 0 0 50px var(--accent-glow)"; };
-            utterance.onend = () => { document.body.style.boxShadow = "none"; };
-            utterance.onerror = () => { document.body.style.boxShadow = "none"; };
+            utterance.onend = () => { document.body.style.boxShadow = "none"; isTTSPlaying = false; };
+            utterance.onerror = () => { document.body.style.boxShadow = "none"; isTTSPlaying = false; };
 
             synth.speak(utterance);
         }, 50);
@@ -772,16 +775,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // SI SIGUE GRABANDO (Walkie-Talkie normal no soltado O Modo Continuous/Lock activado)
             if (isRecording) {
-                // Re-iniciamos el ciclo de escucha
-                setTimeout(() => {
-                    if (isRecording) {
-                        try {
-                            recognition.start();
-                        } catch (e) {
-                            console.log("No se pudo auto-reiniciar:", e.name, e.message);
-                        }
+                // Re-iniciamos el ciclo de escucha inteligentemente
+                const attemptRestart = () => {
+                    if (!isRecording) return; // Si el usuario apagó el lock manualmente en el interín
+
+                    if (isTTSPlaying) {
+                        // El celular está leyendo una traducción en voz alta, esperamos medio segundo más.
+                        // Esto EVITA el Efecto Eco (que el propio celular se escuche a sí mismo y se traduzca).
+                        setTimeout(attemptRestart, 500);
+                        return;
                     }
-                }, 400); // 400ms delay para evitar colisiones iOS/Android AudioCtx
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.log("No se pudo auto-reiniciar:", e.name, e.message);
+                    }
+                };
+
+                setTimeout(attemptRestart, 400); // Intento de reinicio 400ms después de que acabó la frase
                 return;
             }
 
