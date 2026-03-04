@@ -711,13 +711,14 @@ body {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 40px;
-    padding: 4px 14px;
+    padding: 2px 10px;
+    /* Super reducido */
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     padding-bottom: 20px;
-    margin-bottom: -32px;
+    margin-bottom: -34px;
 }
 
 /* Modificaciones a los Selectores dentro del nuevo diseño */
@@ -730,12 +731,12 @@ body {
 }
 
 .flag-icon {
-    font-size: 16px;
+    font-size: 14px;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
 .bold-select {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-primary);
     background: transparent !important;
@@ -988,48 +989,64 @@ body.is-recording .status-indicator {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid var(--border-glass);
 }
+
 /* =========================================
-   INPUT MANUAL DISCRETO
+   INPUT MANUAL DISCRETO (FLOTANTE)
    ========================================= */
+.manual-input-wrapper {
+    padding: 0 20px 15px 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background: transparent;
+    z-index: 50;
+}
+
 .manual-input-form {
     display: flex;
     gap: 8px;
     width: 100%;
-    max-width: 320px;
-    margin-bottom: 2px;
+    max-width: 380px;
+    background: rgba(20, 20, 30, 0.6);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 6px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .manual-input-field {
-    padding: 8px 12px;
-    height: 36px;
+    padding: 8px 14px;
+    height: 38px;
     font-size: 13px;
     flex: 1;
-    border-radius: 12px;
+    border-radius: 14px;
     margin: 0;
     min-width: 0;
-    background: rgba(255,255,255,0.06);
+    background: transparent;
     color: var(--text-primary);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: none;
     transition: all 0.2s ease;
 }
 
 .manual-input-field:focus {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(99, 102, 241, 0.5);
+    background: rgba(255, 255, 255, 0.05);
     outline: none;
+    box-shadow: none;
 }
 
 .manual-send-btn {
-    height: 36px;
+    height: 38px;
     width: 44px;
-    border-radius: 12px;
+    border-radius: 14px;
     flex-shrink: 0;
     padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(99, 102, 241, 0.4);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(99, 102, 241, 0.8);
+    border: none;
     color: white;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1041,5 +1058,5 @@ body.is-recording .status-indicator {
 
 .manual-send-btn:active {
     transform: scale(0.95);
-    background: rgba(99, 102, 241, 0.6);
+    background: rgba(99, 102, 241, 1);
 }

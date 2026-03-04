@@ -99,10 +99,8 @@
 
         </section>
 
-        <!-- Controles Inferiores (Walkie-Talkie) -->
-        <footer class="ptt-controls">
-
-            <!-- Campo Discreto Manual (Fallback sin Voz) -->
+        <!-- Campo Discreto Manual (Floating Action Input) -->
+        <div class="manual-input-wrapper">
             <form id="manual-input-form" class="manual-input-form">
                 <input type="text" id="manual-text-input" class="glass-input manual-input-field"
                     placeholder="Escribe aquí..." data-i18n-placeholder="typeToTranslate" autocomplete="off">
@@ -110,6 +108,10 @@
                     <i class="ph-fill ph-paper-plane-tilt"></i>
                 </button>
             </form>
+        </div>
+
+        <!-- Controles Inferiores (Walkie-Talkie) -->
+        <footer class="ptt-controls">
 
             <div class="status-indicator" id="status-text">Listo para transmitir</div>
 
