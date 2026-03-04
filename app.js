@@ -722,56 +722,44 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         recognition.onend = () => {
-            // SI SIGUE GRABANDO (El usuario NO ha presionado Stop todavía)
-            // Significa que el navegador cortó el micro por "silencio prolongado" o por ser iOS (continuous=false)
-            if (isRecording) {
-                // En iOS/Safari, recognition.start() después de onend necesita delay para cerrar el ciclo anterior.
-                // 400ms evitan el InvalidStateError y dan tiempo al motor de audio para reiniciarse limpiamente.
-                setTimeout(() => {
-                    if (isRecording) { // Verificar de nuevo por si el usuario paró mientras esperábamos
-                        try {
-                            recognition.start();
-                            return;
-                        } catch (e) {
-                            console.log("No se pudo auto-reiniciar:", e.name, e.message);
-                        }
-                    }
-                }, 400);
-                return; // Salimos aquí para no ejecutar el procesamiento de texto todavía
-            }
-
-            isRecording = false;
-            pttBtn.classList.remove('recording');
-            document.body.classList.remove('is-recording');
-
-            // Actualizar boton instruction visual text
-            const instructionEl = document.querySelector('.instruction');
-            if (instructionEl) instructionEl.innerText = getT().tapToTalk;
-
-            // Combinar y limpiar texto
+            // Recoger el texto acumulado del ciclo que acaba de terminar
             let rawText = finalTranscript.trim();
+            finalTranscript = '';
 
-            // --- TRUCO DE ENTONACIÓN Y PUNTUACIÓN VISUAL ---
-            // Los motores de dictado no ponen comas literales en dispositivos móviles. 
-            // Añadimos puntuación antes de enviar a firebase para que se vea reflejado en la pantalla.
+            // Si hay texto, lo preparamos y enviamos/hablamos
             if (rawText) {
-                // Comas para conectores menores
+                // Truco de Puntuación
                 rawText = rawText.replace(/ (pero|porque|aunque|y|but|because|although|and|mais|parce que|et) /gi, ', $1 ');
-                // Puntos para conectores mayores
                 rawText = rawText.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
-
-                // Normalización gramatical básica
                 rawText = rawText.charAt(0).toUpperCase() + rawText.slice(1);
                 if (!/[.!?]$/.test(rawText)) {
                     rawText += ".";
                 }
+                sendMessageToFirebase(rawText);
             }
 
-            const textToSend = rawText;
+            // SI SIGUE GRABANDO (Walkie-Talkie normal no soltado O Modo Continuous/Lock activado)
+            if (isRecording) {
+                // Re-iniciamos el ciclo de escucha
+                setTimeout(() => {
+                    if (isRecording) {
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.log("No se pudo auto-reiniciar:", e.name, e.message);
+                        }
+                    }
+                }, 400); // 400ms delay para evitar colisiones iOS/Android AudioCtx
+                return;
+            }
 
-            sendMessageToFirebase(textToSend);
+            // Si llegamos aquí, isRecording es falso (El usuario soltó tap o quitó el candado manualmente sin texto extra)
+            isRecording = false;
+            pttBtn.classList.remove('recording');
+            document.body.classList.remove('is-recording');
 
-            finalTranscript = ''; // Limpiar siempre al terminar
+            const instructionEl = document.querySelector('.instruction');
+            if (instructionEl) instructionEl.innerText = getT().tapToTalk;
         };
     }
 
