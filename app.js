@@ -822,101 +822,173 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 6. SIMULACIÓN DEL BOTÓN TOGGLE (Tocar para Grabar / Tocar para Detener) --- //
-    const toggleRecording = (e) => {
-        // Evitamos doble disparo
-        if (e && e.cancelable) e.preventDefault();
+    // --- 6. SIMULACIÓN DEL BOTÓN PTT (Tap/Hold To Talk & Swipe Up To Lock) (UX Premium) --- //
+    const instructionEl = document.querySelector('.instruction');
+    const lockIndicator = document.getElementById('lock-indicator');
+    let touchStartY = 0;
+    let isLockedMode = false;
+    let isSwiping = false;
 
+    const startRecordingSession = () => {
         // En Modo Sala es obligatorio el nombre, en Modo Solo es opcional.
         if (currentMode === 'room' && !usernameInput.value.trim()) {
             alert(getT().alertName);
             usernameInput.focus();
+            return false;
+        }
+
+        if (!recognition || isRecording) return true;
+
+        isRecording = true;
+        finalTranscript = '';
+        pttBtn.classList.add('recording');
+        document.body.classList.add('is-recording');
+        statusText.innerText = getT().statusListening;
+        if (instructionEl) instructionEl.innerText = getT().tapToStop;
+
+        // DESBLOQUEO DEL AUDIOCTX EN iOS (CRÍTICO para auto-play de la traducción):
+        if (synth) {
+            try {
+                const unlock = new SpeechSynthesisUtterance('');
+                unlock.volume = 0;
+                synth.speak(unlock);
+            } catch (e) { /* Ignorar si falla */ }
+        }
+
+        recognition.lang = myLangSelect.value;
+
+        // CRÍTICO iOS: recognition.start() DEBE llamarse sincrónicamente
+        try {
+            recognition.start();
+        } catch (err) {
+            if (err.name !== 'InvalidStateError') {
+                console.error("No se pudo iniciar reconocimiento:", err);
+                statusText.innerText = "Error: micrófono ocupado";
+                stopVisualRecording();
+            }
+        }
+        return true;
+    };
+
+    const stopVisualRecording = () => {
+        isRecording = false;
+        isLockedMode = false;
+        pttBtn.classList.remove('recording', 'locked');
+        document.body.classList.remove('is-recording');
+        if (instructionEl) instructionEl.innerText = getT().tapToTalk;
+    };
+
+    const stopRecordingSession = () => {
+        if (!isRecording) return;
+        stopVisualRecording();
+
+        if (statusText.innerText === getT().statusListening || statusText.innerText === "Escuchando...") {
+            statusText.innerText = "Procesando...";
+        }
+
+        try {
+            recognition.stop();
+        } catch (err) {
+            console.error(err);
+        }
+
+        // Respaldo de Limpieza Suprema
+        setTimeout(() => {
+            if (isRecording === false && finalTranscript !== '') {
+                // Si pasaron 2 segundos de haber presionado STOP y onend nunca disparó, forzamos enviar y limpiar.
+                let rawText = finalTranscript.trim();
+                if (rawText) {
+                    rawText = rawText.replace(/ (pero|porque|aunque|y|but|because|although|and|mais|parce que|et) /gi, ', $1 ');
+                    rawText = rawText.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
+                    rawText = rawText.charAt(0).toUpperCase() + rawText.slice(1);
+                    if (!/[.!?]$/.test(rawText)) rawText += ".";
+                    sendMessageToFirebase(rawText);
+                }
+                finalTranscript = '';
+            }
+            stopVisualRecording();
+            if (statusText) statusText.innerText = getT().statusReady;
+        }, 2000);
+    };
+
+    // Eliminamos el listener de "click" y nos movemos a "Pointer Events" unificados nativos (Mouse y Touch a la vez)
+    pttBtn.addEventListener('pointerdown', (e) => {
+        // Solo actuar con botón primario de mouse o un solo dedo
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+        e.preventDefault(); // Evitamos comportamiento scroll accidental
+
+        // REGLA 1: Si ya estamos en grabación (Por Lock o porque se buggeó), un simple Toque Cierra.
+        if (isRecording) {
+            stopRecordingSession();
             return;
         }
 
-        const instructionEl = document.querySelector('.instruction');
+        // Si no estamos grabando, iniciamos el calentamiento
+        if (startRecordingSession()) {
+            touchStartY = e.clientY;
+            isSwiping = true;
 
-        if (!isRecording) {
-            // Empezar a grabar
-            if (!recognition) return;
-            isRecording = true;
-            finalTranscript = '';
-            pttBtn.classList.add('recording');
-            document.body.classList.add('is-recording');
-            statusText.innerText = getT().statusListening;
-            if (instructionEl) instructionEl.innerText = getT().tapToStop;
-
-            // DESBLOQUEO DEL AUDIOCTX EN iOS (CRÍTICO para auto-play de la traducción):
-            // iOS Safari bloquea cualquier audio que no provenga del gesto original del usuario.
-            // Hacemos un speak() silencioso aquí (sincrónicamente en el click) para "abrir la puerta"
-            // del AudioContext. Así, cuando la traducción termine y speakText() se llame de forma
-            // asíncrona, iOS ya tiene permiso y reproduce la voz automáticamente.
-            if (synth) {
-                try {
-                    const unlock = new SpeechSynthesisUtterance('');
-                    unlock.volume = 0;
-                    synth.speak(unlock);
-                } catch (e) { /* Ignorar si falla */ }
+            // Aparece el indicador fantasma de deslizar ligeramente arriba
+            if (lockIndicator) {
+                lockIndicator.classList.remove('active');
+                lockIndicator.classList.add('visible');
             }
-
-            recognition.lang = myLangSelect.value;
-
-            // CRÍTICO iOS: recognition.start() DEBE llamarse sincrónicamente
-            // dentro del event handler del usuario.
-            try {
-                recognition.start();
-            } catch (err) {
-                // InvalidStateError significa que ya estaba iniciado, se ignora.
-                if (err.name !== 'InvalidStateError') {
-                    console.error("No se pudo iniciar reconocimiento:", err);
-                    statusText.innerText = "Error: micrófono ocupado";
-                    isRecording = false;
-                    pttBtn.classList.remove('recording');
-                    document.body.classList.remove('is-recording');
-                    if (instructionEl) instructionEl.innerText = getT().tapToTalk;
-                }
-            }
-        } else {
-            // Detener grabación -> Respuesta Inmediata en la Interfaz (UI)
-            isRecording = false;
-            pttBtn.classList.remove('recording');
-            document.body.classList.remove('is-recording');
-            if (instructionEl) instructionEl.innerText = getT().tapToTalk;
-
-            if (statusText.innerText === getT().statusListening || statusText.innerText === "Escuchando...") {
-                statusText.innerText = "Procesando...";
-            }
-
-            try {
-                recognition.stop();
-            } catch (err) {
-                console.error(err);
-            }
-
-            // Respaldo de Limpieza Suprema: Si el navegador mata el onend nativo, la UI igual se repondrá
-            setTimeout(() => {
-                if (isRecording === false && finalTranscript !== '') {
-                    // Si pasaron 2 segundos de haber presionado STOP y onend nunca disparó (Bug de Android), forzamos enviar y limpiar.
-                    let rawText = finalTranscript.trim();
-                    if (rawText) {
-                        rawText = rawText.replace(/ (pero|porque|aunque|y|but|because|although|and|mais|parce que|et) /gi, ', $1 ');
-                        rawText = rawText.replace(/ (entonces|además|por lo tanto|sin embargo|then|therefore|donc) /gi, '. $1 ');
-                        rawText = rawText.charAt(0).toUpperCase() + rawText.slice(1);
-                        if (!/[.!?]$/.test(rawText)) rawText += ".";
-                        sendMessageToFirebase(rawText);
-                    }
-                    finalTranscript = '';
-                }
-                pttBtn.classList.remove('recording');
-                document.body.classList.remove('is-recording');
-                if (statusText) statusText.innerText = getT().statusReady;
-                if (instructionEl) instructionEl.innerText = getT().tapToTalk;
-            }, 2000);
+            // Anclamos los movimientos del dedo a este botón aunque el usuario se salga arrastrando
+            pttBtn.setPointerCapture(e.pointerId);
         }
-    };
+    });
 
-    // Usar click unificado en lugar de mousedown/touchstart para evitar doble-disparo fantasma en móviles
-    pttBtn.addEventListener('click', toggleRecording);
+    pttBtn.addEventListener('pointermove', (e) => {
+        if (!isSwiping || !isRecording || isLockedMode) return;
+
+        const deltaY = touchStartY - e.clientY;
+
+        // Si el usuario "lanzó" el dedo hacia arriba 40 píxeles o más (SWIPE UP)
+        if (deltaY > 40) {
+            isLockedMode = true;
+            isSwiping = false;
+
+            // Feedback Visual de que lograste el LOCK (magenta style)
+            pttBtn.classList.remove('recording');
+            pttBtn.classList.add('locked');
+            if (lockIndicator) lockIndicator.classList.add('active');
+            if (instructionEl) instructionEl.innerText = "Modo Contínuo Bloqueado";
+
+            // Pasado 1 segundo, ocultamos el iconito del candado que estorba arriba
+            setTimeout(() => {
+                if (lockIndicator) lockIndicator.classList.remove('visible', 'active');
+            }, 1000);
+        }
+    });
+
+    pttBtn.addEventListener('pointerup', (e) => {
+        if (!isRecording) return;
+
+        isSwiping = false;
+        if (lockIndicator) lockIndicator.classList.remove('visible');
+
+        // REGLA 2: Si levantó el dedo y NO alcanzó a hacer Swipe-Up (modo Walkie-Talkie normal)
+        if (!isLockedMode) {
+            stopRecordingSession();
+        }
+        // Si estaba Locked, simplemente no hacemos nada. Escuchará de corrido hasta que pique de nuevo.
+
+        pttBtn.releasePointerCapture(e.pointerId);
+    });
+
+    // Si llaman por celular, si se sale la pantalla, cancelamos.
+    pttBtn.addEventListener('pointercancel', (e) => {
+        isSwiping = false;
+        if (lockIndicator) lockIndicator.classList.remove('visible');
+        if (isRecording && !isLockedMode) {
+            stopRecordingSession();
+        }
+        pttBtn.releasePointerCapture(e.pointerId);
+    });
+
+    // Desactivamos menú contextual feo al dejar el dedo presionado largo rato en iOS
+    pttBtn.addEventListener('contextmenu', e => e.preventDefault());
 
     // Eliminar mensaje base de bienvenida original (limpieza final)
     const initialBubbles = document.querySelectorAll('.message-bubble');
