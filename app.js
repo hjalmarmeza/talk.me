@@ -24,6 +24,24 @@ setTimeout(() => { window.isInitialLoad = false; }, 2000); // 2 segs para ignora
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // WARM-UP GLOBAL (IOS/SAFARI UNLOCK)
+    // Desbloquea el motor TTS en el primer toque del usuario a la pantalla
+    // Esto previene que se colisione con el micrófono al presionar el botón de grabar.
+    let isTtsUnlocked = false;
+    const unlockTTS = () => {
+        if (!isTtsUnlocked && window.speechSynthesis) {
+            if (window.speechSynthesis.state === 'paused') window.speechSynthesis.resume();
+            let ut = new SpeechSynthesisUtterance('');
+            ut.volume = 0;
+            window.speechSynthesis.speak(ut);
+            isTtsUnlocked = true;
+            document.removeEventListener('touchstart', unlockTTS);
+            document.removeEventListener('click', unlockTTS);
+        }
+    };
+    document.addEventListener('touchstart', unlockTTS, { once: true });
+    document.addEventListener('click', unlockTTS, { once: true });
+
     // Referencias al DOM
     const appLangSelect = document.getElementById('app-lang-select');
     const pttBtn = document.getElementById('ptt-button');
@@ -822,15 +840,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const instructionEl = document.querySelector('.instruction');
 
         if (!isRecording) {
-            // WARM-UP DEL WEBSPEECH ENGINE SÍNCRONO: Desbloquea iOS/Safari permitiéndole reproducir después asincronamente.
-            // LO HACEMOS SOLO AL INICIAR PARA NO CAUSAR UN DEADLOCK DE MICROFONO/ALTAVOZ EN IOS SAFARI AL DETENER.
-            if (synth && synth.state === 'paused') synth.resume();
-            if (synth) {
-                let ut = new SpeechSynthesisUtterance('');
-                ut.volume = 0;
-                synth.speak(ut);
-            }
-
             // Empezar a grabar
             if (!recognition) return;
             isRecording = true;
