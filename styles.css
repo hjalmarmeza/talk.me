@@ -624,66 +624,47 @@ body {
 }
 
 /* =========================================
-   HISTORIAL DE CHAT - WRAPPER CLIP (Ocultar scrollbar nativo iOS)
+   HISTORIAL DE CHAT - SIN SCROLLBAR VISIBLE
    ========================================= */
 
-/* Contenedor externo: su overflow:hidden corta el area del chat.
-   En móvil, usamos margin-right negativo para extender el área más allá
-   del borde derecho de la pantalla — haciendo que la barra de scroll
-   de iOS quede físicamente FUERA del área visible. */
 .chat-history-clip {
     flex: 1;
-    overflow: hidden;
     position: relative;
     min-height: 0;
-    /* Crítico para flex: permite que el contenedor se comprima */
-    /* Extensión más allá del borde derecho de la pantalla.
-       El overflow:hidden del body recorta este exceso. */
-    margin-right: -20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .chat-history {
-    /* 50px más ancho que el clip: el scrollbar de iOS cae ~50px más allá
-       del borde derecho de la pantalla = completamente invisible */
-    width: calc(100% + 50px);
-    height: 100%;
-    overflow-y: scroll;
+    flex: 1;
+    width: 100%;
+    overflow-y: auto;
     overflow-x: hidden;
-    /* padding-right compensa el ancho extra para que el contenido
-       siga bien centrado y no se corte */
-    padding: 20px 20px 20px 20px;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
 
+    /* Ocultar barra en navegadores estándar */
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
-    resize: none !important;
 }
 
-.chat-history::-webkit-scrollbar,
-.chat-history::-webkit-scrollbar-thumb,
-.chat-history::-webkit-scrollbar-track,
-.chat-history::-webkit-resizer,
-.chat-history::-webkit-scrollbar-corner {
+/* Ocultar completamente la barra en Safari, Chrome, iOS nativo */
+.chat-history::-webkit-scrollbar {
     width: 0 !important;
     height: 0 !important;
     display: none !important;
     background: transparent !important;
-    visibility: hidden !important;
-    -webkit-appearance: none !important;
     opacity: 0 !important;
 }
 
-/* En desktop (más de 480px) restauramos el margen normal since
-   la app flota como card y no queremos que se salga del card */
+/* En desktop restauramos vista completa (si aplica) */
 @media (min-width: 481px) {
-    .chat-history-clip {
-        margin-right: 0;
-    }
-
     .chat-history {
-        width: calc(100% + 20px);
+        width: 100%;
     }
 }
 
