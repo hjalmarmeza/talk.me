@@ -13,10 +13,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-let myDeviceId = localStorage.getItem('dialecta_device_id');
+let myDeviceId = localStorage.getItem('talkme_device_id');
 if (!myDeviceId) {
     myDeviceId = Math.random().toString(36).substring(2, 12);
-    localStorage.setItem('dialecta_device_id', myDeviceId);
+    localStorage.setItem('talkme_device_id', myDeviceId);
 }
 
 window.isInitialLoad = true;
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             roomLabel: "Sala:", inviteBtn: "Invitar", inThisRoom: "En esta sala", yourName: "Tu Nombre:",
             namePlaceholder: "Tu Nombre", meLabel: "Tú", otherPersonLabel: "Otra Persona:",
             safeRoomDesc: "Sala segura. Elige los idiomas y toca el botón para hablar o detenerte.",
-            tapToTalk: "Toca para hablar", tapToStop: "Toca para detener", inviteTitle: "Invitar a Dialecta",
+            tapToTalk: "Toca para hablar", tapToStop: "Toca para detener", inviteTitle: "Invitar a Talk.Me",
             inviteDesc: "¿Cómo deseas compartir la invitación?", copyLink: "Copiar Enlace",
             alertName: "¡Espera! Escribe tu nombre primero para que sepan quién invita.",
             statusConnecting: "Conectando...", statusListening: "Escuchando...", statusSending: "Enviando...",
@@ -135,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
             unsupported: "Tu navegador no soporta el reconocimiento de voz. ¡Usa Chrome o Safari!",
             copied: "¡Copiado!", youString: " (Tú)", noNameString: "Tú (Aún sin nombre)",
             anon: "Usuario Anónimo", youMsg: "Tú",
-            shareSubject: "Invitación a Dialecta de ",
-            shareBody: "Únete a mi sala en Dialecta para traducir nuestras voces en tiempo real:",
+            shareSubject: "Invitación a Talk.Me de ",
+            shareBody: "Únete a mi sala en Talk.Me para traducir nuestras voces en tiempo real:",
             voiceLabel: "Voz:", autoVoice: "Automática",
             clearConfirm: "¿Seguro que quieres borrar todos los mensajes de esta sala para ambos?",
             typeToTranslate: "Escribe aquí para traducir...",
@@ -155,8 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
             unsupported: "Your browser doesn't support speech recognition. Use Chrome or Safari!",
             copied: "Copied!", youString: " (You)", noNameString: "You (No name yet)",
             anon: "Anonymous User", youMsg: "You",
-            shareSubject: "Dialecta invitation from ",
-            shareBody: "Join my Dialecta room to translate our voices in real time:",
+            shareSubject: "Talk.Me invitation from ",
+            shareBody: "Join my Talk.Me room to translate our voices in real time:",
             voiceLabel: "Voice:", autoVoice: "Automatic",
             clearConfirm: "Are you sure you want to clear all messages in this room for both of you?",
             typeToTranslate: "Type here to translate...",
@@ -175,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
             unsupported: "Navigateur non supporté. Utilisez Chrome ou Safari!",
             copied: "Copié!", youString: " (Moi)", noNameString: "Moi (Anonyme)",
             anon: "Anonyme", youMsg: "Moi",
-            shareSubject: "Invitation Dialecta de ",
-            shareBody: "Rejoins ma salle Dialecta pour traduire nos voix en direct:",
+            shareSubject: "Invitation Talk.Me de ",
+            shareBody: "Rejoins ma salle Talk.Me pour traduire nos voix en direct:",
             voiceLabel: "Voix:", autoVoice: "Automatique",
             clearConfirm: "Êtes-vous sûr de vouloir effacer tous les messages de cette salle pour tous les deux ?",
             typeToTranslate: "Écrire ici pour traduire...",
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aquí hacemos que la app recuerde quién es el usuario y su idioma.
     // Así los nietos se lo configuran 1 sola vez y el abuelo ya no debe tocar nada.
 
-    const savedAppLang = localStorage.getItem('dialectaAppLang');
+    const savedAppLang = localStorage.getItem('talkmeAppLang');
     const savedName = localStorage.getItem('lingoName');
     const savedLang = localStorage.getItem('lingoLang');
     const savedTargetLang = localStorage.getItem('lingoTargetLang');
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (appLangSelect) {
         appLangSelect.addEventListener('change', () => {
-            localStorage.setItem('dialectaAppLang', appLangSelect.value);
+            localStorage.setItem('talkmeAppLang', appLangSelect.value);
             updateUI(); // Traduce la app instantáneamente
         });
     }
@@ -1113,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryContent.innerHTML = `
                 <div style="text-align:center; padding: 20px;">
                     <i class="ph ph-spinner ph-spin" style="font-size: 30px;"></i>
-                    <p style="margin-top: 15px; opacity: 0.8;">Dialecta AI está revisando la transcripción de la sala...</p>
+                    <p style="margin-top: 15px; opacity: 0.8;">Talk.Me AI está revisando la transcripción de la sala...</p>
                 </div>
             `;
 
@@ -1149,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <ul style="padding-left: 20px; font-size: 13px; background: rgba(0,0,0,0.1); border-radius: 6px; padding: 12px 12px 12px 25px;">
                         ${puntos}
                     </ul>
-                    <p style="margin-top: 15px; opacity: 0.6; font-size: 11px; text-align: center;">Generado por Dialecta Logic™</p>
+                    <p style="margin-top: 15px; opacity: 0.6; font-size: 11px; text-align: center;">Generado por Talk.Me Logic™</p>
                 `;
             }, 2500); // 2.5s Demostrando "Heavy Analysis"
         });
