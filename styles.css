@@ -576,19 +576,27 @@ body {
 .chat-history {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
 
     /* Scrollbar invisible para look limpio */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    resize: none !important;
 }
 
-.chat-history::-webkit-scrollbar {
-    width: 0;
-    height: 0;
+.chat-history::-webkit-scrollbar,
+.chat-history::-webkit-resizer,
+.chat-history::-webkit-scrollbar-corner {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+    visibility: hidden !important;
+    -webkit-appearance: none !important;
 }
 
 .system-message {
