@@ -29,9 +29,21 @@
 /* =========================================
    RESET & BASE
    ========================================= */
-* {
+html,
+body {
     margin: 0;
     padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    /* Evitar rubber-banding en Safari */
+    /* Ocultar scrollbars globales */
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+* {
     box-sizing: border-box;
     /* Ocultar barras de scroll globalmente en todo el DOM */
     scrollbar-width: none !important;
@@ -53,17 +65,16 @@
     background: transparent !important;
     display: none !important;
     visibility: hidden !important;
+    -webkit-appearance: none !important;
 }
 
 body {
     background-color: var(--bg-dark);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
     position: relative;
 }
 

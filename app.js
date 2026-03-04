@@ -682,14 +682,14 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition.onend = () => {
             // SI SIGUE GRABANDO (Es decir, el usuario NO fue quien presionó el botón para detener)
             // Significa que Chrome/Safari cortó el micro por "silencio prolongado". 
-            // Para solucionarlo, simplemente encendemos el mic en secreto de nuevo para que sea infinito.
             if (isRecording) {
                 try {
                     recognition.start();
+                    return; // Si el reinicio es exitoso, cortamos la función para no detener la UI
                 } catch (e) {
                     console.log("No se pudo auto-reiniciar", e);
+                    // Si el auto-reinicio falla (típico en iOS Safari sin gesto del usuario), dejamos caer al flujo normal para resetear la UI obligatoriamente.
                 }
-                return; // Cortamos la función para que NO mande el mensaje ni detenga visualmente nada
             }
 
             isRecording = false;
