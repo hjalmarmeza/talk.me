@@ -1,18 +1,30 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBUhWqhxZk3Gvhjz66D02LUJgcytFbS4bo",
-    authDomain: "dialecta-42e1d.firebaseapp.com",
-    databaseURL: "https://dialecta-42e1d-default-rtdb.firebaseio.com",
-    projectId: "dialecta-42e1d",
-    storageBucket: "dialecta-42e1d.firebasestorage.app",
-    messagingSenderId: "607459496925",
-    appId: "1:607459496925:web:83b129e898bef094c55c34"
+    apiKey: "AIzaSyCx...", // (Mantenlo tal como lo tienes)
+    authDomain: "talkme-4e207.firebaseapp.com",
+    databaseURL: "https://talkme-4e207-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "talkme-4e207",
+    storageBucket: "talkme-4e207.appspot.com",
+    messagingSenderId: "37424614138",
+    appId: "1:37424614138:web:b1d7d0ddfcbe51f0f0ffb5"
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getDatabase(app);
+
+// Iniciar sesión anónima automáticamente
+signInAnonymously(auth)
+    .then(() => {
+        console.log("Autenticación anónima exitosa");
+    })
+    .catch((error) => {
+        console.error("Error en autenticación anónima:", error);
+    });
+
 let myDeviceId = localStorage.getItem('talkme_device_id');
 if (!myDeviceId) {
     myDeviceId = Math.random().toString(36).substring(2, 12);

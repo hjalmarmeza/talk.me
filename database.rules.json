@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomId": {
+        ".read": "auth != null",
+        "messages": {
+          "$messageId": {
+            ".write": "auth != null && !data.exists() && newData.exists()",
+            ".validate": "newData.hasChildren(['deviceId', 'originalText', 'senderName'])"
+          }
+        },
+        ".write": "auth != null && (newData.val() == null || !data.exists())"
+      }
+    }
+  }
+}
+
