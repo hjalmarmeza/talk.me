@@ -75,24 +75,24 @@
             </div>
 
             <div id="room-info-section" class="room-info mode-hidden"
-                style="flex-wrap: wrap; gap: 10px; padding: 12px 16px;">
-                <div class="room-badge" style="flex: 1; min-width: 110px;">
+                style="display: flex; gap: 6px; padding: 6px 12px; margin-bottom: 5px; border-radius: 12px; align-items: center;">
+                <div class="room-badge" style="white-space: nowrap; font-size: 12px;">
                     <span class="status-dot"></span>
-                    <span data-i18n="roomLabel">Sala:</span> <strong id="room-id-display">creando...</strong>
+                    <span data-i18n="roomLabel">Sala:</span> <strong id="room-id-display">--</strong>
                 </div>
 
-                <div style="display: flex; gap: 8px; flex: 2; min-width: 200px; max-width: 100%;">
-                    <input type="text" id="username" class="glass-input" placeholder="Tu Nombre"
+                <div style="display: flex; gap: 6px; flex: 1; align-items: center;">
+                    <input type="text" id="username" class="glass-input" placeholder="Nombre"
                         data-i18n-placeholder="namePlaceholder"
-                        style="padding: 6px 12px; height: 34px; font-size: 13px; flex: 1; margin: 0; min-width: 0;">
+                        style="padding: 4px 8px; height: 32px; font-size: 12px; flex: 1; margin: 0; min-width: 0;">
 
                     <button id="invite-btn" class="glass-btn-small"
-                        style="height: 34px; padding: 0 12px; flex-shrink: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(236, 72, 153, 0.4));">
-                        <i class="ph ph-share-network"></i> <span data-i18n="inviteBtn">Invitar</span>
+                        style="height: 32px; padding: 0 8px; flex-shrink: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(236, 72, 153, 0.4));">
+                        <i class="ph ph-share-network"></i> <span class="hide-mobile" data-i18n="inviteBtn">Invitar</span>
                     </button>
 
                     <button id="summary-btn" class="glass-btn-small"
-                        style="height: 34px; padding: 0 12px; flex-shrink: 0; background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.4));"
+                        style="height: 32px; padding: 0 8px; flex-shrink: 0; background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.4));"
                         title="Resumir Sala">
                         <i class="ph-fill ph-magic-wand"></i> <span class="hide-mobile">Resumir</span>
                     </button>
@@ -275,7 +275,7 @@
     </main>
 
     <!-- Script Principal con Cache Busting -->
-    <script type="module" src="app.js?v=eco8"></script>
+    <script type="module" src="app.js?v=eco9"></script>
 </body>
 
 </html>

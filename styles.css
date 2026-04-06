@@ -662,12 +662,12 @@ body {
     -webkit-overflow-scrolling: touch;
 
     /* El padding-right compensa totalmente los -40px y añade 20px matemáticos de espacio visual interno */
-    padding: 20px 60px 20px 20px;
+    padding: 10px 60px 20px 15px;
     box-sizing: border-box;
 
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
 
     /* Ocultar barra en navegadores estándar */
     scrollbar-width: none !important;
@@ -713,6 +713,7 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--border-glass);
+    margin-bottom: 5px;
     animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     word-break: break-word;
     /* Evita que el texto o los "..." se salgan de la burbuja */
@@ -1181,12 +1182,11 @@ body.is-recording .status-indicator {
    ========================================= */
 .manual-input-wrapper {
     width: 100%;
-    padding: 0 15px 15px 15px;
+    padding: 0 15px 10px 15px;
     display: flex;
     justify-content: center;
     background: transparent;
     z-index: 50;
-    margin-top: auto;
 }
 
 .manual-input-form {
