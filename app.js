@@ -16,14 +16,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// Iniciar sesión anónima automáticamente
-signInAnonymously(auth)
-    .then(() => {
-        console.log("Autenticación anónima exitosa");
-    })
-    .catch((error) => {
-        console.error("Error en autenticación anónima:", error);
-    });
+signInAnonymously(auth).catch((error) => console.error("Auth error:", error));
 
 let myDeviceId = localStorage.getItem('talkme_device_id');
 if (!myDeviceId) {
@@ -32,11 +25,10 @@ if (!myDeviceId) {
 }
 
 window.isInitialLoad = true;
-setTimeout(() => { window.isInitialLoad = false; }, 2000); // 2 segs para ignorar audios viejos al cargar
+setTimeout(() => { window.isInitialLoad = false; }, 2000);
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Referencias al DOM (Sincronizadas con diseño premium)
     const appLangSelect = document.getElementById('app-lang-select');
     const pttBtn = document.getElementById('ptt-button');
     const statusText = document.getElementById('status-text');
@@ -50,31 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const roomIdDisplay = document.getElementById('room-id-display');
     const inviteBtn = document.getElementById('invite-btn');
     const shareModal = document.getElementById('share-modal');
-    const closeShare = document.getElementById('close-share');
-    
-    // Referencias de Ajustes (Nuevas)
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const closeSettingsBtn = document.getElementById('close-settings');
-
-    // Referencias de Elementos con Guardas (Posibles nulos en nuevo diseño)
-    const contactsBtn = document.getElementById('contacts-btn');
-    const closeContactsBtn = document.getElementById('close-contacts');
-    const contactsPanel = document.getElementById('contacts-panel');
-
-    // Elementos de Pestañas
+    const closeShareBtn = document.getElementById('close-share');
+    const roomInfoSection = document.getElementById('room-info-section');
     const tabSolo = document.getElementById('tab-solo');
     const tabRoom = document.getElementById('tab-room');
-    const roomInfoSection = document.getElementById('room-info-section');
 
-    // Nodos de Pantalla Dividida (Split Screen)
     const splitScreenBtn = document.getElementById('split-screen-btn');
     const closeSplitBtn = document.getElementById('close-split-btn');
     const chatHistoryClipTop = document.getElementById('chat-history-clip-top');
     const chatDivider = document.getElementById('chat-divider');
     const chatHistoryTop = document.getElementById('chat-history-top');
 
-    // Nuevos Elementos (Offline, OCR, AI Summary)
     const offlineBadge = document.getElementById('offline-badge');
     const ocrBtn = document.getElementById('ocr-btn');
     const ocrFileInput = document.getElementById('ocr-file-input');
@@ -86,72 +64,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryContent = document.getElementById('summary-content');
     const copySummaryBtn = document.getElementById('copy-summary-btn');
 
-    // --- LÓGICA DE NAVEGACIÓN (Estabilizada y Protegida) --- //
-    let currentMode = 'solo'; // 'solo' o 'room'
-    if (chatHistory) chatHistory.dataset.activeMode = 'solo';
+    // Referencias de Ajustes
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettingsBtn = document.getElementById('close-settings');
+
+    let currentMode = 'solo';
+    chatHistory.dataset.activeMode = 'solo';
 
     let splitModeActive = false;
 
     const enableSplitScreen = () => {
         splitModeActive = true;
-        if (chatHistoryClipTop) chatHistoryClipTop.classList.remove('mode-hidden');
-        if (chatDivider) chatDivider.classList.remove('mode-hidden');
+        chatHistoryClipTop.classList.remove('mode-hidden');
+        chatDivider.classList.remove('mode-hidden');
         if (chatHistoryTop) chatHistoryTop.scrollTop = chatHistoryTop.scrollHeight;
     };
 
     const disableSplitScreen = () => {
         splitModeActive = false;
-        if (chatHistoryClipTop) chatHistoryClipTop.classList.add('mode-hidden');
-        if (chatDivider) chatDivider.classList.add('mode-hidden');
+        chatHistoryClipTop.classList.add('mode-hidden');
+        chatDivider.classList.add('mode-hidden');
     };
 
     if (splitScreenBtn) splitScreenBtn.addEventListener('click', enableSplitScreen);
     if (closeSplitBtn) closeSplitBtn.addEventListener('click', disableSplitScreen);
 
-    if (inviteBtn) {
-        inviteBtn.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            if (shareModal) shareModal.classList.remove('hidden');
-        });
-    }
-    if (closeShare) {
-        closeShare.addEventListener('click', () => {
-            if (shareModal) shareModal.classList.add('hidden');
-        });
-    }
-
     if (tabSolo) {
-        tabSolo.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation();
+        tabSolo.addEventListener('click', () => {
             currentMode = 'solo';
             tabSolo.classList.add('active');
-            if (tabRoom) tabRoom.classList.remove('active');
-            if (roomInfoSection) roomInfoSection.classList.add('mode-hidden');
-            if (chatHistory) {
-                chatHistory.dataset.activeMode = 'solo';
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-            }
+            tabRoom.classList.remove('active');
+            roomInfoSection.classList.add('mode-hidden');
+            chatHistory.dataset.activeMode = 'solo';
+            chatHistory.scrollTop = chatHistory.scrollHeight;
             if (splitScreenBtn) splitScreenBtn.classList.remove('mode-hidden');
         });
     }
 
     if (tabRoom) {
-        tabRoom.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation();
+        tabRoom.addEventListener('click', () => {
             currentMode = 'room';
             tabRoom.classList.add('active');
-            if (tabSolo) tabSolo.classList.remove('active');
-            if (roomInfoSection) roomInfoSection.classList.remove('mode-hidden');
-            if (chatHistory) {
-                chatHistory.dataset.activeMode = 'room';
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-            }
+            tabSolo.classList.remove('active');
+            roomInfoSection.classList.remove('mode-hidden');
+            chatHistory.dataset.activeMode = 'room';
+            chatHistory.scrollTop = chatHistory.scrollHeight;
             if (splitScreenBtn) splitScreenBtn.classList.add('mode-hidden');
             disableSplitScreen();
         });
     }
 
-    // Lógica del nuevo botón de ajustes (Diseño Premium)
+    // Lógica del botón de ajustes
     if (settingsBtn && settingsModal) {
         settingsBtn.addEventListener('click', (e) => {
             e.preventDefault(); e.stopPropagation();
@@ -161,24 +125,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeSettingsBtn && settingsModal) {
         closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
     }
-    if (settingsModal) {
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) settingsModal.classList.add('hidden');
-        });
-    }
 
-    // Elementos de la Lista de Contactos (Guardas)
     const selfContactName = document.querySelector('.self-contact .contact-name');
     const selfContactLang = document.querySelector('.self-contact .contact-lang');
 
-    // Variables de Estado
     let isRecording = false;
     let finalTranscript = '';
     let interimTranscript = '';
     let sessionTranscript = '';
     let isLockedMode = false;
 
-    // --- I18N (INTERNACIONALIZACIÓN ESTABLE) --- //
     const translations = {
         'es': {
             roomLabel: "Sala:", inviteBtn: "Invitar", inThisRoom: "En esta sala", yourName: "Tu Nombre:",
@@ -219,6 +175,26 @@ document.addEventListener('DOMContentLoaded', () => {
             typeToTranslate: "Type here to translate...",
             langES: "Spanish", langEN: "English (US)", langFR: "French", langDE: "German",
             langIT: "Italian", langPT: "Portuguese (BR)", langJA: "Japanese", langZH: "Chinese"
+        },
+        'fr': {
+            roomLabel: "Salle:", inviteBtn: "Inviter", inThisRoom: "Dans cette salle", yourName: "Ton Nom:",
+            namePlaceholder: "Ton Nom", meLabel: "Moi", otherPersonLabel: "Autre:",
+            safeRoomDesc: "Salle sécurisée. Choisissez la langue et appuyez pour parler ou arrêter.",
+            tapToTalk: "Appuyez pour parler", tapToStop: "Appuyez pour arrêter", inviteTitle: "Inviter un ami",
+            inviteDesc: "Comment partager l'invitation ?", copyLink: "Copier le lien",
+            alertName: "Tapez votre nom d'abord pour qu'ils sachent qui invite.",
+            statusListening: "Écoute...", statusSending: "Envoi...",
+            statusReady: "Prêt à parler", statusIncoming: "Message entrant...",
+            unsupported: "Navigateur non supporté. Utilisez Chrome o Safari!",
+            copied: "Copié!", youString: " (Moi)", noNameString: "Moi (Anonyme)",
+            anon: "Anonyme", youMsg: "Moi",
+            shareSubject: "Invitation Talk.Me de ",
+            shareBody: "Rejoins ma salle Talk.Me pour traduire nos voix en direct:",
+            voiceLabel: "Voix:", autoVoice: "Automatique",
+            clearConfirm: "Êtes-vous sûr de vouloir effacer tous les messages de cette salle pour tous les deux ?",
+            typeToTranslate: "Écrire ici pour traduire...",
+            langES: "Espagnol", langEN: "Anglais (US)", langFR: "Français", langDE: "Allemand",
+            langIT: "Italien", langPT: "Portugais (BR)", langJA: "Japonais", langZH: "Chinois"
         }
     };
 
@@ -237,27 +213,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const key = el.getAttribute('data-i18n-placeholder');
             if (t[key]) el.placeholder = t[key];
         });
-
-        if (usernameInput) {
-            const val = usernameInput.value.trim();
-            if (selfContactName) selfContactName.innerText = val ? val + t.youString : t.noNameString;
-        }
-
-        if (!isRecording && statusText && statusText.innerText !== t.statusIncoming) {
+        const val = usernameInput.value.trim();
+        if (selfContactName) selfContactName.innerText = val ? val + t.youString : t.noNameString;
+        if (!isRecording && statusText.innerText !== t.statusIncoming) {
             statusText.innerText = t.statusReady;
         }
     }
 
-    // Memoria Automática
     const savedAppLang = localStorage.getItem('talkmeAppLang');
     const savedName = localStorage.getItem('lingoName');
     const savedLang = localStorage.getItem('lingoLang');
     const savedTargetLang = localStorage.getItem('lingoTargetLang');
 
     if (savedAppLang && appLangSelect) appLangSelect.value = savedAppLang;
-    if (savedName && usernameInput) usernameInput.value = savedName;
-    if (savedLang && myLangSelect) myLangSelect.value = savedLang;
-    if (savedTargetLang && targetLangSelect) targetLangSelect.value = savedTargetLang;
+    if (savedName) usernameInput.value = savedName;
+    if (savedLang) myLangSelect.value = savedLang;
+    if (savedTargetLang) targetLangSelect.value = savedTargetLang;
 
     updateUI();
 
@@ -268,49 +239,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (usernameInput) {
-        usernameInput.addEventListener('input', (e) => {
-            const val = e.target.value.trim();
-            const t = getT();
-            localStorage.setItem('lingoName', val);
-            if (selfContactName) selfContactName.innerText = val ? val + t.youString : t.noNameString;
-        });
-    }
+    usernameInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        localStorage.setItem('lingoName', val);
+        updateUI();
+    });
 
     const flagMap = {
         'es-ES': '🇪🇸', 'en-US': '🇺🇸', 'fr-FR': '🇫🇷', 'de-DE': '🇩🇪',
         'it-IT': '🇮🇹', 'pt-BR': '🇧🇷', 'ja-JP': '🇯🇵', 'zh-CN': '🇨🇳'
     };
 
-    if (myLangSelect) {
-        myLangSelect.addEventListener('change', () => {
-            const val = myLangSelect.value;
-            localStorage.setItem('lingoLang', val);
-            if (selfContactLang) selfContactLang.innerText = myLangSelect.options[myLangSelect.selectedIndex].text;
-            if (myFlag) myFlag.innerText = flagMap[val] || '🌐';
-            updateUI();
-        });
-    }
+    myLangSelect.addEventListener('change', () => {
+        const val = myLangSelect.value;
+        localStorage.setItem('lingoLang', val);
+        if (myFlag) myFlag.innerText = flagMap[val] || '🌐';
+        updateUI();
+    });
 
-    if (targetLangSelect) {
-        targetLangSelect.addEventListener('change', () => {
-            const val = targetLangSelect.value;
-            localStorage.setItem('lingoTargetLang', val);
-            if (targetFlag) targetFlag.innerText = flagMap[val] || '🌐';
-        });
-    }
+    targetLangSelect.addEventListener('change', () => {
+        const val = targetLangSelect.value;
+        localStorage.setItem('lingoTargetLang', val);
+        if (targetFlag) targetFlag.innerText = flagMap[val] || '🌐';
+    });
 
-    if (swapLangBtn) {
-        swapLangBtn.addEventListener('click', () => {
-            const temp = myLangSelect.value;
-            myLangSelect.value = targetLangSelect.value;
-            targetLangSelect.value = temp;
-            myLangSelect.dispatchEvent(new Event('change'));
-            targetLangSelect.dispatchEvent(new Event('change'));
-        });
-    }
+    if (myFlag) myFlag.innerText = flagMap[myLangSelect.value] || '🌐';
+    if (targetFlag) targetFlag.innerText = flagMap[targetLangSelect.value] || '🌐';
 
-    // --- LÓGICA DE SALAS ---
+    swapLangBtn.addEventListener('click', () => {
+        const temp = myLangSelect.value;
+        myLangSelect.value = targetLangSelect.value;
+        targetLangSelect.value = temp;
+        myLangSelect.dispatchEvent(new Event('change'));
+        targetLangSelect.dispatchEvent(new Event('change'));
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     let currentRoom = urlParams.get('room');
     if (!currentRoom) {
@@ -318,44 +281,74 @@ document.addEventListener('DOMContentLoaded', () => {
         const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?room=' + currentRoom;
         window.history.pushState({ path: newUrl }, '', newUrl);
     }
-    if (roomIdDisplay) roomIdDisplay.innerText = currentRoom;
+    roomIdDisplay.innerText = currentRoom;
 
     const messagesRef = ref(db, `rooms/${currentRoom}/messages`);
 
-    // --- FIREBASE SYNC (RECIBIR MENSAJES) ---
+    onChildRemoved(messagesRef, () => {
+        document.querySelectorAll('.message-bubble').forEach(b => b.remove());
+    });
+
     onChildAdded(messagesRef, async (snapshot) => {
         const msg = snapshot.val();
-        const currentUser = (usernameInput && usernameInput.value.trim()) || getT().anon;
-
         if (msg.deviceId === myDeviceId) {
             const targetLang = targetLangSelect.value;
-            let traduccionViaje = msg.originalText;
+            let translation = msg.originalText;
             if (msg.originalLang.split('-')[0] !== targetLang.split('-')[0]) {
-                traduccionViaje = await translateText(msg.originalText, msg.originalLang, targetLang);
+                translation = await translateText(msg.originalText, msg.originalLang, targetLang);
             }
-            addChatBubble(currentUser, msg.originalText, traduccionViaje, true, targetLang, 'room');
+            addChatBubble(usernameInput.value, msg.originalText, translation, true, targetLang, 'room');
         } else {
-            if (statusText) statusText.innerText = getT().statusIncoming;
-            const miIdiomaDynamic = myLangSelect.value;
-            let traduccionParaMi = msg.originalText;
-            if (msg.originalLang.split('-')[0] !== miIdiomaDynamic.split('-')[0]) {
-                traduccionParaMi = await translateText(msg.originalText, msg.originalLang, miIdiomaDynamic);
+            statusText.innerText = getT().statusIncoming;
+            const myLang = myLangSelect.value;
+            let translation = msg.originalText;
+            if (msg.originalLang.split('-')[0] !== myLang.split('-')[0]) {
+                translation = await translateText(msg.originalText, msg.originalLang, myLang);
             }
-            addChatBubble(msg.senderName, msg.originalText, traduccionParaMi, false, miIdiomaDynamic, 'room');
-            if (!window.isInitialLoad) speakText(traduccionParaMi, miIdiomaDynamic);
-            if (statusText) statusText.innerText = getT().statusReady;
+            addChatBubble(msg.senderName, msg.originalText, translation, false, myLang, 'room');
+            if (!window.isInitialLoad) speakText(translation, myLang);
+            statusText.innerText = getT().statusReady;
         }
     });
 
-    // --- RECONOCIMIENTO DE VOZ (ESTABLE) ---
+    closeShareBtn.addEventListener('click', () => shareModal.classList.add('hidden'));
+    shareModal.addEventListener('click', (e) => { if (e.target === shareModal) shareModal.classList.add('hidden'); });
+    inviteBtn.addEventListener('click', () => shareModal.classList.remove('hidden'));
+
+    function getShareData() {
+        const t = getT();
+        const currentUser = usernameInput.value.trim() || t.anon;
+        const link = window.location.href;
+        const shortText = `¡Hola! ${currentUser} te invita. ${t.shareBody} ${link}`;
+        return { currentUser, link, shortText, t };
+    }
+
+    document.getElementById('share-wa').addEventListener('click', () => {
+        const data = getShareData();
+        window.open(`https://wa.me/?text=${encodeURIComponent(data.shortText)}`, '_blank');
+        shareModal.classList.add('hidden');
+    });
+    document.getElementById('share-copy').addEventListener('click', async () => {
+        const data = getShareData();
+        try {
+            await navigator.clipboard.writeText(data.shortText);
+            const btn = document.getElementById('share-copy');
+            const orig = btn.innerHTML;
+            btn.innerHTML = `<i class="ph-fill ph-check-circle"></i> ${data.t.copied}`;
+            setTimeout(() => { btn.innerHTML = orig; }, 2000);
+        } catch (e) { alert("Error: " + data.link); }
+    });
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
     let synth = window.speechSynthesis;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isMobileSafari = isIOS || (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent));
 
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
-        const isAndroid = /Android/i.test(navigator.userAgent);
-        recognition.continuous = !isAndroid;
+        recognition.continuous = !isMobileSafari && !isAndroid;
         recognition.interimResults = !isAndroid;
     }
 
@@ -363,10 +356,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!text) return "";
         const sl = sourceLang.split('-')[0];
         const tl = targetLang.split('-')[0];
+        const cacheKey = `tr_${sl}_${tl}_${text.substring(0, 250)}`;
+        const localCache = sessionStorage.getItem(cacheKey);
+        if (localCache) return localCache;
         try {
             const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${tl}&dt=t&q=${encodeURIComponent(text)}`);
             const data = await response.json();
-            return data[0].map(item => item[0]).join('');
+            const res = data[0].map(item => item[0]).join('');
+            sessionStorage.setItem(cacheKey, res);
+            return res;
         } catch (error) { return text; }
     }
 
@@ -378,39 +376,69 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            utterance.onend = () => { isTTSPlaying = false; };
-            utterance.onerror = () => { isTTSPlaying = false; };
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            const voices = synth.getVoices();
+            const targetLangPrefix = lang.split('-')[0];
+            const premiumMaleVoices = {
+                'es': ["Jorge", "Diego", "Google español", "Pablo"],
+                'en': ["Alex", "Daniel", "Google UK English Male", "Google US English Male"],
+                'fr': ["Thomas", "Paul", "Google français"],
+                'de': ["Markus", "Google Deutsch"],
+                'it': ["Luca", "Google italiano"],
+                'pt': ["Tiago", "Google português do Brasil"],
+                'ja': ["Otoya", "Google 日本語"],
+                'zh': ["Li-mu", "Google 普通话 (中国大陆)"]
+            };
+            const preferredNames = premiumMaleVoices[targetLangPrefix] || ["Male", "male", "Hombre", "man"];
+            let bestVoice = voices.find(v => v.lang.startsWith(targetLangPrefix) && preferredNames.some(name => v.name.includes(name)));
+            if (!bestVoice) bestVoice = voices.find(v => v.lang.startsWith(targetLangPrefix));
+            if (bestVoice) utterance.voice = bestVoice;
+            utterance.onstart = () => { document.body.style.boxShadow = "inset 0 0 50px var(--accent-glow)"; };
+            utterance.onend = () => { document.body.style.boxShadow = "none"; isTTSPlaying = false; };
+            utterance.onerror = () => { document.body.style.boxShadow = "none"; isTTSPlaying = false; };
             synth.speak(utterance);
-        }, 100);
+        }, 50);
     }
 
     function addChatBubble(senderName, originalText, translatedText, isOutgoing, langToSpeak, modeCategory = 'room') {
         const bubble = document.createElement('div');
         bubble.className = `message-bubble mode-${modeCategory} ${isOutgoing ? 'outgoing' : 'incoming'}`;
         const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
         bubble.innerHTML = `
-            <div style="font-size: 11px; margin-bottom: 4px; opacity: 0.7; font-weight: bold;">
-                <span>${senderName}</span>
-                <span style="font-size: 9px; margin-left: 8px;">${timeString}</span>
+            <div style="font-size: 11px; margin-bottom: 4px; opacity: 0.7; font-weight: bold; color: ${isOutgoing ? 'var(--text-translated)' : 'var(--accent-secondary)'}; display: flex; justify-content: space-between; align-items: center;">
+                <span>${isOutgoing ? getT().youMsg : senderName}</span>
+                <span class="msg-time" style="font-size: 9px; opacity: 0.6; font-weight: normal;">${timeString}</span>
             </div>
             <div class="msg-original">${originalText}</div>
             <div class="msg-translated">${translatedText}</div>
-            <button class="play-btn" style="background:none; border:none; color:inherit; cursor:pointer;"><i class="ph-fill ph-play-circle"></i></button>
+            <button class="play-btn"><i class="ph-fill ph-play-circle"></i></button>
         `;
-        bubble.querySelector('.play-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            speakText(translatedText, langToSpeak);
-        });
-        if (chatHistory) {
-            chatHistory.appendChild(bubble);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
+        bubble.querySelector('.play-btn').addEventListener('click', () => speakText(translatedText, langToSpeak));
+        chatHistory.appendChild(bubble);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+        if (chatHistoryTop) {
+            const clone = bubble.cloneNode(true);
+            clone.querySelector('.play-btn').addEventListener('click', () => speakText(translatedText, langToSpeak));
+            chatHistoryTop.appendChild(clone);
+            chatHistoryTop.scrollTop = chatHistoryTop.scrollHeight;
         }
     }
 
+    let silenceTimer = null;
+    const resetSilenceTimer = () => {
+        if (silenceTimer) clearTimeout(silenceTimer);
+        if (isLockedMode) {
+            silenceTimer = setTimeout(() => {
+                if (isLockedMode && isRecording) stopRecordingSession();
+            }, 10000);
+        }
+    };
+
     if (recognition) {
-        recognition.onstart = () => { if (statusText) statusText.innerText = getT().statusListening; };
+        recognition.onstart = () => { statusText.innerText = getT().statusListening; resetSilenceTimer(); };
         recognition.onresult = (event) => {
+            resetSilenceTimer();
             let currentInterim = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + ' ';
@@ -422,122 +450,134 @@ document.addEventListener('DOMContentLoaded', () => {
             let rawText = (finalTranscript + " " + interimTranscript).trim();
             finalTranscript = ''; interimTranscript = '';
             if (rawText) sessionTranscript += (sessionTranscript ? " " : "") + rawText;
-
             if (isRecording) {
-                const restart = () => {
-                    if (!isRecording) return;
-                    if (isTTSPlaying) { setTimeout(restart, 500); return; }
-                    try { recognition.start(); } catch (e) {}
-                };
-                setTimeout(restart, 400);
-            } else if (sessionTranscript) {
-                sendMessage(sessionTranscript.trim());
+                setTimeout(() => { if (isRecording && !isTTSPlaying) try { recognition.start(); } catch(e) {} }, 400);
+                return;
+            }
+            if (sessionTranscript) {
+                sendMessageToFirebase(sessionTranscript.trim());
                 sessionTranscript = '';
             }
+            stopVisualRecording();
         };
     }
 
-    async function sendMessage(text) {
+    async function sendMessageToFirebase(text) {
         if (!text) return;
-        if (statusText) statusText.innerText = getT().statusSending;
-        const miIdioma = myLangSelect.value;
-        const t = getT();
-
+        statusText.innerText = getT().statusSending;
         if (currentMode === 'solo') {
             const targetLang = targetLangSelect.value;
-            const traduccion = await translateText(text, miIdioma, targetLang);
-            addChatBubble(t.youMsg, text, traduccion, true, targetLang, 'solo');
-            speakText(traduccion, targetLang);
-            if (statusText) statusText.innerText = t.statusReady;
+            const translation = await translateText(text, myLangSelect.value, targetLang);
+            addChatBubble(getT().youMsg, text, translation, true, targetLang, 'solo');
+            setTimeout(() => speakText(translation, targetLang), 60);
+            statusText.innerText = getT().statusReady;
         } else {
             push(messagesRef, {
                 deviceId: myDeviceId,
-                senderName: usernameInput.value.trim() || t.anon,
+                senderName: usernameInput.value.trim() || getT().anon,
                 originalText: text,
-                originalLang: miIdioma,
+                originalLang: myLangSelect.value,
                 timestamp: serverTimestamp()
-            }).finally(() => { if (statusText) statusText.innerText = t.statusReady; });
+            }).finally(() => { setTimeout(() => statusText.innerText = getT().statusReady, 1200); });
         }
     }
 
-    // Input Manual con Redimensionado (Hasta 4 líneas)
     const manualInputForm = document.getElementById('manual-input-form');
     const manualTextInput = document.getElementById('manual-text-input');
-    if (manualInputForm && manualTextInput) {
-        manualTextInput.addEventListener('input', () => {
-            manualTextInput.style.height = 'auto';
-            const newHeight = Math.min(manualTextInput.scrollHeight, 120);
-            manualTextInput.style.height = newHeight + 'px';
-        });
-
+    if (manualInputForm) {
         manualInputForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const text = manualTextInput.value.trim();
-            if (text) {
-                sendMessage(text);
-                manualTextInput.value = '';
-                manualTextInput.style.height = 'auto';
-                manualTextInput.blur();
-            }
+            if (!text) return;
+            sendMessageToFirebase(text);
+            manualTextInput.value = ''; manualTextInput.blur();
         });
     }
 
-    // PTT Events e Interacciones Protegidas
-    if (pttBtn) {
-        pttBtn.addEventListener('pointerdown', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            if (isRecording) {
-                isRecording = false;
-                if (recognition) recognition.stop();
-                pttBtn.classList.remove('recording');
-            } else {
-                if (currentMode === 'room' && !usernameInput.value.trim()) {
-                    alert(getT().alertName);
-                    settingsModal.classList.remove('hidden'); // Abrir ajustes directo
-                    usernameInput.focus();
-                    return;
-                }
-                isRecording = true;
-                finalTranscript = ''; interimTranscript = ''; sessionTranscript = '';
-                pttBtn.classList.add('recording');
-                if (recognition) {
-                    recognition.lang = myLangSelect.value;
-                    try { recognition.start(); } catch(err) { console.error(err); }
-                }
-            }
-        });
-    }
-
-    // --- ACCIONES DE COMPARTIR ---
-    const shareWA = document.getElementById('share-wa');
-    const shareTG = document.getElementById('share-tg');
-    const shareEmail = document.getElementById('share-email');
-    const shareCopy = document.getElementById('share-copy');
-
-    const getShareData = () => {
-        const link = window.location.href;
-        const text = `¡Únete a mi sala de Talk.Me para que hablemos en cualquier idioma! ${link}`;
-        return { link, text };
+    const startRecordingSession = () => {
+        if (!recognition || isRecording) return;
+        isRecording = true; finalTranscript = ''; interimTranscript = ''; sessionTranscript = '';
+        pttBtn.classList.add('recording');
+        document.body.classList.add('is-recording');
+        statusText.innerText = getT().statusListening;
+        recognition.lang = myLangSelect.value;
+        try { recognition.start(); } catch(e) {}
     };
 
-    if (shareWA) shareWA.addEventListener('click', () => {
-        const data = getShareData();
-        window.open(`https://wa.me/?text=${encodeURIComponent(data.text)}`, '_blank');
+    const stopVisualRecording = () => {
+        isRecording = false; isLockedMode = false;
+        pttBtn.classList.remove('recording', 'locked');
+        document.body.classList.remove('is-recording');
+    };
+
+    const stopRecordingSession = () => {
+        if (!isRecording) return;
+        try { recognition.stop(); } catch(e) {}
+        stopVisualRecording();
+    };
+
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let isSwiping = false;
+
+    pttBtn.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        e.preventDefault();
+        if (isRecording) { stopRecordingSession(); return; }
+        startRecordingSession();
+        touchStartY = e.clientY; touchStartTime = Date.now(); isSwiping = true;
+        pttBtn.setPointerCapture(e.pointerId);
     });
 
-    if (shareTG) shareTG.addEventListener('click', () => {
-        const data = getShareData();
-        window.open(`https://t.me/share/url?url=${encodeURIComponent(data.link)}&text=${encodeURIComponent(data.text)}`, '_blank');
+    pttBtn.addEventListener('pointermove', (e) => {
+        if (!isSwiping || !isRecording || isLockedMode) return;
+        if (touchStartY - e.clientY > 40) {
+            isLockedMode = true; isSwiping = false;
+            pttBtn.classList.remove('recording'); pttBtn.classList.add('locked');
+        }
     });
 
-    if (shareCopy) shareCopy.addEventListener('click', async () => {
-        const data = getShareData();
-        await navigator.clipboard.writeText(data.text);
-        const originalText = shareCopy.innerText;
-        shareCopy.innerText = "¡Copiado!";
-        setTimeout(() => shareCopy.innerText = originalText, 2000);
+    pttBtn.addEventListener('pointerup', (e) => {
+        if (!isRecording) return;
+        isSwiping = false;
+        if (Date.now() - touchStartTime < 400 && !isLockedMode) {
+            isLockedMode = true; pttBtn.classList.remove('recording'); pttBtn.classList.add('locked');
+        } else if (!isLockedMode) stopRecordingSession();
+        pttBtn.releasePointerCapture(e.pointerId);
     });
 
-    // Limpieza de mensajes iniciales
-    document.querySelectorAll('.message-bubble').forEach(b => b.remove());
+    // OCR Logic
+    if (ocrBtn && ocrFileInput) {
+        ocrBtn.addEventListener('click', () => ocrFileInput.click());
+        ocrFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            ocrModal.classList.remove('hidden');
+            try {
+                const { data: { text } } = await Tesseract.recognize(file, 'eng+spa+fra');
+                manualTextInput.value = text.trim();
+                manualTextInput.focus();
+            } catch (err) { console.error(err); } finally { ocrModal.classList.add('hidden'); ocrFileInput.value = ''; }
+        });
+    }
+
+    // Summary Logic
+    if (summaryBtn && summaryModal) {
+        summaryBtn.addEventListener('click', () => {
+            summaryModal.classList.remove('hidden');
+            summaryContent.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="ph ph-spinner ph-spin"></i><p>Analiando sala...</p></div>';
+            setTimeout(() => {
+                const msgs = Array.from(chatHistory.querySelectorAll('.message-bubble.mode-room')).slice(-5);
+                if (msgs.length < 1) { summaryContent.innerText = "No hay mensajes para resumir."; return; }
+                const puntos = msgs.map(m => `<li>${m.querySelector('.msg-translated').innerText}</li>`).join('');
+                summaryContent.innerHTML = `<div style="font-weight:600; margin-bottom:12px;">Resumen Ejecutivo</div><ul>${puntos}</ul>`;
+            }, 2000);
+        });
+        closeSummary.addEventListener('click', () => summaryModal.classList.add('hidden'));
+        copySummaryBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(summaryContent.innerText);
+            copySummaryBtn.innerText = "¡Copiado!";
+            setTimeout(() => copySummaryBtn.innerHTML = '<i class="ph-fill ph-copy"></i> Copiar Resumen', 2000);
+        });
+    }
 });

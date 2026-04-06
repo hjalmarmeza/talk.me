@@ -29,15 +29,17 @@
 /* =========================================
    RESET & BASE
    ========================================= */
-html {
+html, body {
     margin: 0;
     padding: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden !important;
-    overscroll-behavior: none;
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    background-color: var(--bg-dark);
+    -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
 }
 
 html::-webkit-scrollbar {
@@ -325,18 +327,40 @@ body {
 }
 
 .glass-btn-small {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    padding: 8px 14px;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-glass);
+    border-radius: 10px;
+    color: #fff;
     font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
+    font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition: all 0.3s ease;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    touch-action: manipulation;
+}
+
+#invite-btn, #summary-btn {
+    min-width: 100px;
+    padding: 0 14px;
+}
+
+.ocr-btn, .manual-send-btn {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    min-width: 44px;
+    border-radius: 50% !important;
+    padding: 0 !important;
+}
+
+.manual-input-field::placeholder {
+    font-size: 11px;
+    opacity: 0.6;
 }
 
 .glass-btn-small:hover {
@@ -526,7 +550,8 @@ body {
 }
 
 .glass-input::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 12px;
     font-weight: 400;
 }
 
@@ -1257,6 +1282,11 @@ body.is-recording .status-indicator {
     background: transparent;
     color: var(--text-primary);
     border: none;
+}
+
+.manual-input-field::placeholder {
+    font-size: 11px;
+    opacity: 0.6;
 }
 
 .manual-input-field:focus {
