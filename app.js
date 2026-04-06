@@ -484,16 +484,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lógica del botón de invitar (Abrir modal)
     inviteBtn.addEventListener('click', () => {
+        // Permitimos abrir el modal aunque no haya nombre, usamos un aviso suave o default
         const currentUser = usernameInput.value.trim();
-
         if (!currentUser) {
-            alert(getT().alertName);
-            usernameInput.focus();
-            return;
+            // No bloqueamos, solo avisamos que sería mejor tener nombre
+            console.log("Invitando sin nombre establecido aún.");
         }
-
         shareModal.classList.remove('hidden');
     });
+
+    // Lógica para el botón de RESUMEN IA
+    if (summaryBtn) {
+        summaryBtn.addEventListener('click', () => {
+            // Esta función suele estar definida más abajo en el archivo original de Talk.Me
+            if (typeof generateSummary === 'function') {
+                generateSummary();
+            } else {
+                alert("La función de resumen aún se está cargando o no está disponible en esta versión.");
+            }
+        });
+    }
 
     // --- ACCIONES ESPECÍFICAS DE COMPARTIR ---
 
