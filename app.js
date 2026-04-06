@@ -400,8 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentUser = usernameInput.value.trim() || getT().anon;
 
         // MÁGICA DE CONTACTOS: Si alguien envía un mensaje y no soy yo, añadirlo al panel
-        if (msg.deviceId !== myDeviceId) {
-            const contactsList = document.getElementById('contacts-list');
+        const contactsList = document.getElementById('contacts-list');
+        if (msg.deviceId !== myDeviceId && contactsList) {
             const existingContact = Array.from(contactsList.querySelectorAll('.contact-item')).find(el => el.dataset.deviceId === msg.deviceId);
 
             if (!existingContact) {
