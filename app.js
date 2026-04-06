@@ -442,11 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             addChatBubble(currentUser, msg.originalText, traduccionViaje, true, idiomaViaje, 'room');
-
-            // Hablamos en voz alta la traducción en nuestro propio celular (Para la persona de en frente)
-            if (!window.isInitialLoad) {
-                speakText(traduccionViaje, idiomaViaje);
-            }
         } else {
             // Viene de un familiar (Entrante)
             statusText.innerText = getT().statusIncoming;
