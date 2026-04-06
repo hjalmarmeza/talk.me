@@ -133,10 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const t = getT();
             if (currentMode === 'room') {
                 if (confirm(t.clearConfirm)) {
-                    remove(messagesRef);
+                     // 1. Intentar borrar en Firebase (sincronizado)
+                    remove(messagesRef).catch(err => console.warn("Firebase remove failed (expected in local):", err));
+                    // 2. Limpiar UI localmente DE INMEDIATO para asegurar respuesta al usuario
+                    document.querySelectorAll('.message-bubble').forEach(b => b.remove());
                 }
             } else {
-                // Modo Solo: Solo limpiar pantalla localmente
+                // Modo Solo: Limpiar pantalla localmente
                 document.querySelectorAll('.message-bubble').forEach(b => b.remove());
             }
         });
