@@ -3,13 +3,13 @@ import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/1
 import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCx...", // (Mantenlo tal como lo tienes)
-    authDomain: "talkme-4e207.firebaseapp.com",
-    databaseURL: "https://talkme-4e207-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "talkme-4e207",
-    storageBucket: "talkme-4e207.appspot.com",
-    messagingSenderId: "37424614138",
-    appId: "1:37424614138:web:b1d7d0ddfcbe51f0f0ffb5"
+    apiKey: "AIzaSyBUhWqhxZk3Gvhjz66D02LUJgcytFbS4bo",
+    authDomain: "dialecta-42e1d.firebaseapp.com",
+    databaseURL: "https://dialecta-42e1d-default-rtdb.firebaseio.com",
+    projectId: "dialecta-42e1d",
+    storageBucket: "dialecta-42e1d.firebasestorage.app",
+    messagingSenderId: "607459496925",
+    appId: "1:607459496925:web:83b129e898bef094c55c34"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -334,8 +334,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- CONEXIÓN REAL CON FIREBASE (RECIBIR MENSAJES) --- //
-    const messagesRef = ref(db, `rooms/${currentRoom}/messages`);
+    // --- AUTOLIMPIEZA DE 24 HORAS (SEGURIDAD Y PRIVACIDAD) --- //
+    const CLEANUP_THRESHOLD = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
+
+    const autoCleanupMessages = () => {
+        const now = Date.now();
+        onChildAdded(messagesRef, (snapshot) => {
+            const msg = snapshot.val();
+            // Si el mensaje tiene timestamp y es más viejo que 24h, lo borramos
+            if (msg.timestamp && (now - msg.timestamp > CLEANUP_THRESHOLD)) {
+                remove(ref(db, `rooms/${currentRoom}/messages/${snapshot.key}`))
+                    .catch(e => console.log("Mensaje antiguo ya no existe o error al limpiar:", e.name));
+            }
+        }, { onlyOnce: true }); // Solo escaneamos una vez al entrar para no saturar
+    };
+
+    // Lanzar limpieza automática al conectar
+    setTimeout(autoCleanupMessages, 3000); 
 
     // Lógica para el botón de borrar sala
     const clearChatBtn = document.getElementById('clear-chat-btn');
