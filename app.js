@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ocrBtn = document.getElementById('ocr-btn');
     const ocrFileInput = document.getElementById('ocr-file-input');
     const ocrModal = document.getElementById('ocr-modal');
+    const clearLocalBtn = document.getElementById('clear-local-btn');
 
     const summaryBtn = document.getElementById('summary-btn');
     const summaryModal = document.getElementById('summary-modal');
@@ -124,6 +125,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (closeSettingsBtn && settingsModal) {
         closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+    }
+
+    // Lógica del botón basurero (Limpiar)
+    if (clearLocalBtn) {
+        clearLocalBtn.addEventListener('click', () => {
+            const t = getT();
+            if (currentMode === 'room') {
+                if (confirm(t.clearConfirm)) {
+                    remove(messagesRef);
+                }
+            } else {
+                // Modo Solo: Solo limpiar pantalla localmente
+                document.querySelectorAll('.message-bubble').forEach(b => b.remove());
+            }
+        });
     }
 
     const selfContactName = document.querySelector('.self-contact .contact-name');
