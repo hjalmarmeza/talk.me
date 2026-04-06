@@ -24,7 +24,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- OCR Engine -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=eco12">
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -82,6 +82,10 @@
                 </div>
 
                 <div style="display: flex; gap: 6px; flex: 1; align-items: center;">
+                    <input type="text" id="username" class="glass-input" placeholder="Nombre"
+                        data-i18n-placeholder="namePlaceholder"
+                        style="padding: 4px 8px; height: 32px; font-size: 12px; flex: 1; margin: 0; min-width: 0;">
+
                     <button id="invite-btn" class="glass-btn-small"
                         style="height: 32px; padding: 0 8px; flex-shrink: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(236, 72, 153, 0.4));">
                         <i class="ph ph-share-network"></i> <span class="hide-mobile" data-i18n="inviteBtn">Invitar</span>
@@ -137,83 +141,21 @@
                         <i class="ph ph-camera"></i>
                     </button>
                 </div>
-                <textarea id="manual-text-input" class="glass-input manual-input-field"
-                    placeholder="Escribe aquí..." data-i18n-placeholder="typeToTranslate" rows="1" style="resize: none; overflow-y: hidden; line-height: 1.4; padding-top: 10px;"></textarea>
-                <!-- Botón PTT (micrófono) inline, mismo tamaño que send-btn -->
-                <div class="ptt-wrapper ptt-inline">
-                    <div id="lock-indicator" class="lock-indicator">
-                        <i class="ph-fill ph-lock-key"></i>
-                    </div>
-                    <div class="ripple-ring rings-1"></div>
-                    <div class="ripple-ring rings-2"></div>
-                    <button type="button" id="ptt-button" class="ptt-btn ptt-btn-inline" aria-label="Mantener presionado para hablar">
-                        <i class="ph-fill ph-microphone"></i>
-                    </button>
-                </div>
+                <input type="text" id="manual-text-input" class="glass-input manual-input-field"
+                    placeholder="Escribe aquí..." data-i18n-placeholder="typeToTranslate" autocomplete="off">
                 <button type="submit" id="manual-send-btn" class="glass-btn-small manual-send-btn">
                     <i class="ph-fill ph-paper-plane-tilt"></i>
                 </button>
             </form>
         </div>
 
-        <!-- Controles Inferiores -->
+        <!-- Controles Inferiores (Walkie-Talkie) -->
         <footer class="ptt-controls">
-            <!-- status-text hidden (invisible) para mantener referencias JS -->
-            <div class="status-indicator" id="status-text" style="display:none;"></div>
 
-            <div class="pill-tabs-container">
-                <button type="button" id="tab-solo" class="pill-tab active"><i class="ph ph-user"></i> <span
-                        style="margin-left: 6px;">En Persona</span></button>
-                <div class="pill-divider"></div>
-                <button type="button" id="tab-room" class="pill-tab"><i class="ph-fill ph-users-three"></i> <span
-                        style="margin-left: 6px;">Sala Grupal</span></button>
-                <div class="pill-divider"></div>
-                <button type="button" id="settings-btn" class="pill-tab pill-tab-icon" title="Configuración">
-                    <i class="ph-fill ph-gear"></i>
-                </button>
-            </div>
-        </footer>
+            <div class="status-indicator" id="status-text">Listo para transmitir</div>
 
-        <!-- Modal de Compartir -->
-        <div id="share-modal" class="share-modal hidden">
-            <div class="share-content">
-                <div class="share-header">
-                    <h3 data-i18n="inviteTitle">Invitar a un contacto</h3>
-                    <button id="close-share" class="close-btn"><i class="ph ph-x"></i></button>
-                </div>
-                <p class="share-desc" data-i18n="inviteDesc">¿Por dónde quieres enviar la invitación a la sala?</p>
-                <div class="share-options">
-                    <button class="share-btn whatsapp" id="share-wa">
-                        <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp
-                    </button>
-                    <button class="share-btn telegram" id="share-tg">
-                        <i class="ph-fill ph-telegram-logo"></i> Telegram
-                    </button>
-                    <button class="share-btn email" id="share-email">
-                        <i class="ph-fill ph-envelope"></i> Correo
-                    </button>
-                    <button class="share-btn copy" id="share-copy">
-                        <i class="ph-fill ph-copy"></i> <span data-i18n="copyLink">Copiar Link</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal de Configuración (Idiomas) -->
-        <div id="settings-modal" class="share-modal hidden">
-            <div class="share-content">
-                <div class="share-header">
-                    <h3 data-i18n="settingsTitle">Configuración de Idioma</h3>
-                    <button id="close-settings" class="close-btn"><i class="ph ph-x"></i></button>
-                </div>
-                <p class="share-desc" style="margin-bottom: 25px;">Selecciona tu idioma o intercambialos para la traducción bidireccional.</p>
-                
-                <div class="input-group-modern" style="margin-bottom: 20px;">
-                    <label style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 1px;">Tu Nombre Identificador</label>
-                    <input type="text" id="username" class="glass-input" placeholder="Escribe tu nombre..." data-i18n-placeholder="namePlaceholder" style="width: 100%; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05);">
-                </div>
-
-                <div class="travel-selectors modern-selectors" style="position: relative; margin-bottom: 0; box-shadow: none; border: 1px solid var(--border-glass);">
+            <div class="bottom-action-panel">
+                <div class="travel-selectors modern-selectors">
                     <div class="select-wrapper">
                         <span class="flag-icon" id="my-flag">🇪🇸</span>
                         <select id="my-lang" class="glass-select bold-select">
@@ -245,6 +187,55 @@
                             <option value="zh-CN" data-i18n="langZH">中文</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="ptt-wrapper">
+                    <!-- Icono para Swipe-Up to Lock -->
+                    <div id="lock-indicator" class="lock-indicator">
+                        <i class="ph-fill ph-lock-key"></i>
+                    </div>
+
+                    <div class="ripple-ring rings-1"></div>
+                    <div class="ripple-ring rings-2"></div>
+
+                    <button id="ptt-button" class="ptt-btn" aria-label="Mantener presionado para hablar">
+                        <i class="ph-fill ph-microphone"></i>
+                    </button>
+                </div>
+            </div>
+
+            <p class="instruction" data-i18n="tapToTalk">Toca para hablar</p>
+
+            <div class="pill-tabs-container">
+                <button id="tab-solo" class="pill-tab active"><i class="ph ph-user"></i> <span
+                        style="margin-left: 6px;">En Persona</span></button>
+                <div class="pill-divider"></div>
+                <button id="tab-room" class="pill-tab"><i class="ph-fill ph-users-three"></i> <span
+                        style="margin-left: 6px;">Sala Grupal</span></button>
+            </div>
+        </footer>
+
+        <!-- Modal de Compartir -->
+        <div id="share-modal" class="share-modal hidden">
+            <div class="share-content">
+                <div class="share-header">
+                    <h3 data-i18n="inviteTitle">Invitar a un contacto</h3>
+                    <button id="close-share" class="close-btn"><i class="ph ph-x"></i></button>
+                </div>
+                <p class="share-desc" data-i18n="inviteDesc">¿Por dónde quieres enviar la invitación a la sala?</p>
+                <div class="share-options">
+                    <button class="share-btn whatsapp" id="share-wa">
+                        <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp
+                    </button>
+                    <button class="share-btn telegram" id="share-tg">
+                        <i class="ph-fill ph-telegram-logo"></i> Telegram
+                    </button>
+                    <button class="share-btn email" id="share-email">
+                        <i class="ph-fill ph-envelope"></i> Correo
+                    </button>
+                    <button class="share-btn copy" id="share-copy">
+                        <i class="ph-fill ph-copy"></i> <span data-i18n="copyLink">Copiar Link</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -284,7 +275,7 @@
     </main>
 
     <!-- Script Principal con Cache Busting -->
-    <script type="module" src="app.js?v=eco12"></script>
+    <script type="module" src="app.js?v=eco9"></script>
 </body>
 
 </html>

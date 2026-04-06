@@ -202,8 +202,6 @@ body {
     margin: 5px auto 5px auto;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(0, 0, 0, 0.5);
     align-items: center;
-    position: relative;
-    z-index: 1000;
 }
 
 .pill-divider {
@@ -229,13 +227,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.pill-tab:active {
-    transform: scale(0.95);
-    background: rgba(255, 255, 255, 0.05);
 }
 
 .pill-tab.active {
@@ -255,17 +246,6 @@ body {
 
 .pill-tab:hover:not(.active) {
     color: white;
-}
-
-/* Variante icon-only del pill-tab (botón de engranaje) */
-.pill-tab-icon {
-    flex: 0 0 auto;
-    padding: 5px 10px;
-    min-width: 36px;
-}
-
-.pill-tab-icon i {
-    font-size: 16px;
 }
 
 .mode-hidden {
@@ -822,9 +802,6 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 0;
-    position: relative;
-    z-index: 9999; /* Máxima prioridad para evitar bloqueos táctiles */
-    pointer-events: all;
 }
 
 .status-indicator {
@@ -934,14 +911,6 @@ body {
     margin-bottom: 2px;
 }
 
-/* Variante inline: mismo tamaño que el send-btn (40x40) */
-.ptt-wrapper.ptt-inline {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-}
-
 .ripple-ring {
     position: absolute;
     width: 100%;
@@ -972,14 +941,6 @@ body {
     -webkit-tap-highlight-color: transparent;
     /* Evitamos que el navegador intercepte el drag (iOS) */
     touch-action: none !important;
-}
-
-/* Variante inline: 40x40 igual al send-btn */
-.ptt-btn.ptt-btn-inline {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
-    box-shadow: 0 4px 12px var(--accent-glow), inset 0 1px 3px rgba(255, 255, 255, 0.3);
 }
 
 .ptt-btn:hover {
@@ -1226,11 +1187,6 @@ body.is-recording .status-indicator {
     justify-content: center;
     background: transparent;
     z-index: 50;
-    pointer-events: none; /* Dejar pasar clics al fondo si hay overlap */
-}
-
-.manual-input-form {
-    pointer-events: all; /* Reactivar interactividad solo en el panel real */
 }
 
 .manual-input-form {
@@ -1248,7 +1204,7 @@ body.is-recording .status-indicator {
 
 .manual-input-field {
     padding: 8px 16px;
-    min-height: 40px;
+    height: 40px;
     font-size: 14px;
     flex: 1;
     border-radius: 20px;
