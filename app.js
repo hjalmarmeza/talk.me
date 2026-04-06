@@ -334,6 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- CONEXIÓN REAL CON FIREBASE (RECIBIR MENSAJES) --- //
+    const messagesRef = ref(db, `rooms/${currentRoom}/messages`);
+
     // --- AUTOLIMPIEZA DE 24 HORAS (SEGURIDAD Y PRIVACIDAD) --- //
     const CLEANUP_THRESHOLD = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
 
