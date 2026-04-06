@@ -345,8 +345,13 @@ body {
 }
 
 #invite-btn, #summary-btn {
-    min-width: 100px;
-    padding: 0 14px;
+    min-width: 80px;
+    padding: 0 10px;
+    font-size: 11.5px;
+}
+
+#invite-btn i, #summary-btn i {
+    font-size: 14px;
 }
 
 .ocr-btn, .manual-send-btn {
